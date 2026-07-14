@@ -23,6 +23,13 @@ async function seed() {
     .values({ name: "Maple Grove", slug: "maple-grove" })
     .returning();
 
+  // Bare neighborhoods (no demo content) so the onboarding neighborhood
+  // picker has more than one real option.
+  await db.insert(neighborhoods).values([
+    { name: "Bellair Commons", slug: "bellair-commons" },
+    { name: "Riverside Meadows", slug: "riverside-meadows" },
+  ]);
+
   const passwordHash = await hash("password123", 10);
 
   const [admin, resident] = await db
