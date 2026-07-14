@@ -22,6 +22,15 @@ export const postCategoryEnum = pgEnum("post_category", [
   "recommendation",
   "general",
 ]);
+export const wasteTypeEnum = pgEnum("waste_type", [
+  "trash",
+  "recycling",
+  "bulk",
+]);
+export const scheduleFrequencyEnum = pgEnum("schedule_frequency", [
+  "weekly",
+  "biweekly",
+]);
 
 export const neighborhoods = pgTable("neighborhoods", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -41,6 +50,7 @@ export const users = pgTable("users", {
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
   role: roleEnum("role").notNull().default("resident"),
   unit: varchar("unit", { length: 100 }),
+  directoryOptIn: boolean("directory_opt_in").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -125,6 +135,19 @@ export const reservations = pgTable("reservations", {
     .references(() => users.id, { onDelete: "cascade" }),
   startsAt: timestamp("starts_at").notNull(),
   endsAt: timestamp("ends_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const wasteSchedules = pgTable("waste_schedules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  neighborhoodId: uuid("neighborhood_id")
+    .notNull()
+    .references(() => neighborhoods.id, { onDelete: "cascade" }),
+  type: wasteTypeEnum("type").notNull(),
+  dayOfWeek: integer("day_of_week").notNull(),
+  frequency: scheduleFrequencyEnum("frequency").notNull().default("weekly"),
+  anchorDate: timestamp("anchor_date").notNull(),
+  notes: varchar("notes", { length: 255 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
