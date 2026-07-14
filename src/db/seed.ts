@@ -1,6 +1,6 @@
 import { hash } from "bcryptjs";
 import { db } from "./index";
-import { announcements, events, neighborhoods, users } from "./schema";
+import { amenities, announcements, events, posts, neighborhoods, users } from "./schema";
 
 function daysFromNow(days: number, hour: number) {
   const date = new Date();
@@ -75,8 +75,40 @@ async function seed() {
     },
   ]);
 
+  await db.insert(posts).values([
+    {
+      neighborhoodId: neighborhood.id,
+      authorId: resident.id,
+      category: "yard_sale",
+      title: "Multi-family yard sale — Saturday 8am-noon",
+      body: "12B, 14A, and 16C are all selling. Furniture, kids' clothes, and a barely-used grill.",
+    },
+    {
+      neighborhoodId: neighborhood.id,
+      authorId: resident.id,
+      category: "lost_and_found",
+      title: "Found: grey tabby cat near the clubhouse",
+      body: "No collar. Very friendly. Message me if he's yours!",
+    },
+  ]);
+
+  const [pool] = await db
+    .insert(amenities)
+    .values({
+      neighborhoodId: neighborhood.id,
+      name: "Pool Cabana",
+      description: "Reservable for private parties, up to 4 hours.",
+    })
+    .returning();
+
+  await db.insert(amenities).values({
+    neighborhoodId: neighborhood.id,
+    name: "Clubhouse",
+    description: "Main event space, seats up to 80.",
+  });
+
   console.log(
-    `Seeded neighborhood "${neighborhood.name}" with 2 users, 2 announcements, and 2 events.`,
+    `Seeded neighborhood "${neighborhood.name}" with 2 users, 2 announcements, 2 events, 2 bulletin posts, and 2 amenities (${pool.name} + Clubhouse).`,
   );
   console.log(`Admin login: ${admin.email} / password123`);
   console.log(`Resident login: ${resident.email} / password123`);
