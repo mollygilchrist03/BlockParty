@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
@@ -27,44 +29,34 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-background px-6">
-      <form
-        action={login}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-slate/10 bg-white p-8"
-      >
-        <h1 className="text-center text-xl font-semibold text-navy">
-          Sign in to BlockParty
-        </h1>
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-            Invalid email or password.
-          </p>
-        )}
-        <label className="flex flex-col gap-1 text-sm text-slate">
-          Email
-          <input
-            type="email"
-            name="email"
-            required
-            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-slate">
-          Password
-          <input
-            type="password"
-            name="password"
-            required
-            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-          />
-        </label>
-        <button
-          type="submit"
-          className="mt-2 rounded-full bg-navy px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate"
-        >
-          Sign in
-        </button>
-      </form>
+    <div className="flex flex-1 items-center justify-center bg-background px-6 py-16">
+      <div className="flex w-full max-w-sm flex-col items-center gap-6">
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo.svg" alt="" width={36} height={36} />
+          <span className="text-lg font-semibold text-navy">BlockParty</span>
+        </Link>
+        <form action={login} className="card flex w-full flex-col gap-4">
+          <h1 className="text-center text-xl font-semibold text-navy">
+            Sign in
+          </h1>
+          {error && (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+              Invalid email or password.
+            </p>
+          )}
+          <label className="flex flex-col gap-1 text-sm text-slate">
+            Email
+            <input type="email" name="email" required className="field" />
+          </label>
+          <label className="flex flex-col gap-1 text-sm text-slate">
+            Password
+            <input type="password" name="password" required className="field" />
+          </label>
+          <button type="submit" className="btn-primary mt-2">
+            Sign in
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
