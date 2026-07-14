@@ -54,7 +54,7 @@ export default async function NewNewsletterPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">Upload newsletter</h1>
-      <form action={uploadNewsletter} className="flex flex-col gap-4">
+      <form action={uploadNewsletter} className="card flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm text-slate">
           Title
           <input
@@ -62,17 +62,13 @@ export default async function NewNewsletterPage() {
             name="title"
             required
             placeholder="e.g. May 2026 Newsletter"
-            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+            className="field"
           />
         </label>
         <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1 text-sm text-slate">
             Month
-            <select
-              name="month"
-              defaultValue={now.getMonth() + 1}
-              className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-            >
+            <select name="month" defaultValue={now.getMonth() + 1} className="field">
               {monthNames.map((name, index) => (
                 <option key={name} value={index + 1}>
                   {name}
@@ -87,7 +83,7 @@ export default async function NewNewsletterPage() {
               name="year"
               required
               defaultValue={now.getFullYear()}
-              className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+              className="field"
             />
           </label>
         </div>
@@ -98,13 +94,10 @@ export default async function NewNewsletterPage() {
             name="file"
             accept="application/pdf"
             required
-            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+            className="field file:mr-3 file:rounded-full file:border-0 file:bg-sage-light file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-sage"
           />
         </label>
-        <button
-          type="submit"
-          className="self-start rounded-full bg-navy px-5 py-2 text-sm font-medium text-white hover:bg-slate"
-        >
+        <button type="submit" className="btn-primary self-start">
           Upload
         </button>
       </form>

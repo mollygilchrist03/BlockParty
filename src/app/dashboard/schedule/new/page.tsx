@@ -50,14 +50,10 @@ export default async function NewSchedulePage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">New pickup schedule</h1>
-      <form action={createSchedule} className="flex flex-col gap-4">
+      <form action={createSchedule} className="card flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm text-slate">
           Type
-          <select
-            name="type"
-            defaultValue="trash"
-            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-          >
+          <select name="type" defaultValue="trash" className="field">
             <option value="trash">Trash</option>
             <option value="recycling">Recycling</option>
             <option value="bulk">Bulk pickup</option>
@@ -66,11 +62,7 @@ export default async function NewSchedulePage() {
         <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1 text-sm text-slate">
             Day of week
-            <select
-              name="dayOfWeek"
-              defaultValue="1"
-              className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-            >
+            <select name="dayOfWeek" defaultValue="1" className="field">
               {dayNames.map((name, index) => (
                 <option key={name} value={index}>
                   {name}
@@ -80,11 +72,7 @@ export default async function NewSchedulePage() {
           </label>
           <label className="flex flex-col gap-1 text-sm text-slate">
             Frequency
-            <select
-              name="frequency"
-              defaultValue="weekly"
-              className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-            >
+            <select name="frequency" defaultValue="weekly" className="field">
               <option value="weekly">Weekly</option>
               <option value="biweekly">Biweekly</option>
             </select>
@@ -97,9 +85,9 @@ export default async function NewSchedulePage() {
             name="anchorDate"
             required
             defaultValue={today}
-            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+            className="field"
           />
-          <span className="text-xs text-slate/60">
+          <span className="text-xs text-muted">
             Any confirmed pickup date on the right day of the week. Used to
             work out which week a biweekly pickup falls on.
           </span>
@@ -110,13 +98,10 @@ export default async function NewSchedulePage() {
             type="text"
             name="notes"
             placeholder="e.g. Bins out by 7am"
-            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+            className="field"
           />
         </label>
-        <button
-          type="submit"
-          className="self-start rounded-full bg-navy px-5 py-2 text-sm font-medium text-white hover:bg-slate"
-        >
+        <button type="submit" className="btn-primary self-start">
           Create schedule
         </button>
       </form>
