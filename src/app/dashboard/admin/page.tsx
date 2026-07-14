@@ -1,58 +1,91 @@
 import Link from "next/link";
 import { requireBoard } from "@/lib/session";
+import { IconBadge } from "@/components/icon-badge";
+
+const shortcuts = [
+  {
+    href: "/dashboard/announcements/new",
+    title: "Post an announcement",
+    description: "Share news with the whole neighborhood.",
+    icon: (
+      <>
+        <path d="M3 11v2a2 2 0 0 0 2 2h1l3 5V4L6 9H5a2 2 0 0 0-2 2Z" />
+        <path d="M14 8a4 4 0 0 1 0 8" />
+        <path d="M17 5a8 8 0 0 1 0 14" />
+      </>
+    ),
+  },
+  {
+    href: "/dashboard/events/new",
+    title: "Create an event",
+    description: "Set a date, location, and capacity.",
+    icon: (
+      <>
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M8 3v4M16 3v4M3 10h18" />
+      </>
+    ),
+  },
+  {
+    href: "/dashboard/amenities/new",
+    title: "Add an amenity",
+    description: "Set up a bookable space like a pool cabana or clubhouse.",
+    icon: (
+      <>
+        <circle cx="8" cy="15" r="4" />
+        <path d="M11 12l7-7M16 3l3 3M19 6l-3.5 3.5" />
+      </>
+    ),
+  },
+  {
+    href: "/dashboard/newsletters/new",
+    title: "Upload a newsletter",
+    description: "Add a monthly newsletter PDF to the archive.",
+    icon: (
+      <>
+        <path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 1-1.55.83L14 18" />
+        <path d="M4 4v14a2 2 0 0 0 2 2h10" />
+        <path d="M7 8h8M7 12h8M7 16h4" />
+      </>
+    ),
+  },
+  {
+    href: "/dashboard/schedule/new",
+    title: "Add a pickup schedule",
+    description: "Set the trash, recycling, or bulk pickup day.",
+    icon: (
+      <>
+        <path d="M4 7h16" />
+        <path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" />
+        <path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+      </>
+    ),
+  },
+];
 
 export default async function AdminPage() {
   await requireBoard();
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
-      <h1 className="text-2xl font-semibold text-navy">Admin</h1>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-12 sm:px-10">
+      <div>
+        <p className="text-sm font-medium text-sage">Board &amp; admin</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-navy">
+          Admin
+        </h1>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link
-          href="/dashboard/announcements/new"
-          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
-        >
-          <h2 className="font-semibold text-navy">Post an announcement</h2>
-          <p className="mt-1 text-sm text-slate">
-            Share news with the whole neighborhood.
-          </p>
-        </Link>
-        <Link
-          href="/dashboard/events/new"
-          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
-        >
-          <h2 className="font-semibold text-navy">Create an event</h2>
-          <p className="mt-1 text-sm text-slate">
-            Set a date, location, and capacity.
-          </p>
-        </Link>
-        <Link
-          href="/dashboard/amenities/new"
-          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
-        >
-          <h2 className="font-semibold text-navy">Add an amenity</h2>
-          <p className="mt-1 text-sm text-slate">
-            Set up a bookable space like a pool cabana or clubhouse.
-          </p>
-        </Link>
-        <Link
-          href="/dashboard/newsletters/new"
-          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
-        >
-          <h2 className="font-semibold text-navy">Upload a newsletter</h2>
-          <p className="mt-1 text-sm text-slate">
-            Add a monthly newsletter PDF to the archive.
-          </p>
-        </Link>
-        <Link
-          href="/dashboard/schedule/new"
-          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
-        >
-          <h2 className="font-semibold text-navy">Add a pickup schedule</h2>
-          <p className="mt-1 text-sm text-slate">
-            Set the trash, recycling, or bulk pickup day.
-          </p>
-        </Link>
+        {shortcuts.map((shortcut) => (
+          <Link
+            key={shortcut.href}
+            href={shortcut.href}
+            className="card card-link flex flex-col"
+          >
+            <IconBadge>{shortcut.icon}</IconBadge>
+            <h2 className="font-semibold text-navy">{shortcut.title}</h2>
+            <p className="mt-1 text-sm text-slate">{shortcut.description}</p>
+          </Link>
+        ))}
       </div>
     </div>
   );
