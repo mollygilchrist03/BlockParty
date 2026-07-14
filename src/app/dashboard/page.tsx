@@ -28,6 +28,33 @@ export default async function DashboardPage() {
             Browse upcoming events and RSVP.
           </p>
         </Link>
+        <Link
+          href="/dashboard/board"
+          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
+        >
+          <h2 className="font-semibold text-navy">Bulletin board</h2>
+          <p className="mt-1 text-sm text-slate">
+            Yard sales, lost &amp; found, and recommendations.
+          </p>
+        </Link>
+        <Link
+          href="/dashboard/amenities"
+          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
+        >
+          <h2 className="font-semibold text-navy">Amenities</h2>
+          <p className="mt-1 text-sm text-slate">
+            Reserve the pool cabana, clubhouse, and more.
+          </p>
+        </Link>
+        <Link
+          href="/dashboard/newsletters"
+          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
+        >
+          <h2 className="font-semibold text-navy">Newsletters</h2>
+          <p className="mt-1 text-sm text-slate">
+            Browse the monthly newsletter archive.
+          </p>
+        </Link>
       </div>
     </div>
   );

@@ -21,12 +21,21 @@ export default async function DashboardLayout({
             <Image src="/logo.svg" alt="BlockParty logo" width={32} height={32} />
             <span className="text-lg font-semibold text-navy">BlockParty</span>
           </Link>
-          <nav className="flex items-center gap-6 text-sm font-medium text-slate">
+          <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-slate">
             <Link href="/dashboard/announcements" className="hover:text-sage">
               Announcements
             </Link>
             <Link href="/dashboard/events" className="hover:text-sage">
               Events
+            </Link>
+            <Link href="/dashboard/board" className="hover:text-sage">
+              Bulletin board
+            </Link>
+            <Link href="/dashboard/amenities" className="hover:text-sage">
+              Amenities
+            </Link>
+            <Link href="/dashboard/newsletters" className="hover:text-sage">
+              Newsletters
             </Link>
             {isBoard && (
               <Link href="/dashboard/admin" className="hover:text-sage">
