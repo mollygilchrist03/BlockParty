@@ -1,0 +1,89 @@
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { postCategoryEnum, posts } from "@/db/schema";
+import { requireUser } from "@/lib/session";
+
+const categories = [
+  { value: "general", label: "General" },
+  { value: "yard_sale", label: "Yard sale" },
+  { value: "lost_and_found", label: "Lost & found" },
+  { value: "recommendation", label: "Recommendation" },
+] as const;
+
+async function createPost(formData: FormData) {
+  "use server";
+
+  const user = await requireUser();
+  const title = String(formData.get("title") ?? "").trim();
+  const body = String(formData.get("body") ?? "").trim();
+  const category = String(formData.get("category") ?? "general");
+
+  if (
+    !title ||
+    !body ||
+    !user.neighborhoodId ||
+    !postCategoryEnum.enumValues.includes(category as (typeof postCategoryEnum.enumValues)[number])
+  ) {
+    return;
+  }
+
+  await db.insert(posts).values({
+    neighborhoodId: user.neighborhoodId,
+    authorId: user.id,
+    category: category as (typeof postCategoryEnum.enumValues)[number],
+    title,
+    body,
+  });
+
+  redirect("/dashboard/board");
+}
+
+export default async function NewPostPage() {
+  await requireUser();
+
+  return (
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
+      <h1 className="text-2xl font-semibold text-navy">New post</h1>
+      <form action={createPost} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1 text-sm text-slate">
+          Category
+          <select
+            name="category"
+            defaultValue="general"
+            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+          >
+            {categories.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-slate">
+          Title
+          <input
+            type="text"
+            name="title"
+            required
+            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-slate">
+          Details
+          <textarea
+            name="body"
+            required
+            rows={6}
+            className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
+          />
+        </label>
+        <button
+          type="submit"
+          className="self-start rounded-full bg-navy px-5 py-2 text-sm font-medium text-white hover:bg-slate"
+        >
+          Post
+        </button>
+      </form>
+    </div>
+  );
+}
