@@ -1,6 +1,14 @@
 import { hash } from "bcryptjs";
 import { db } from "./index";
-import { amenities, announcements, events, posts, neighborhoods, users } from "./schema";
+import {
+  amenities,
+  announcements,
+  events,
+  posts,
+  neighborhoods,
+  users,
+  wasteSchedules,
+} from "./schema";
 
 function daysFromNow(days: number, hour: number) {
   const date = new Date();
@@ -35,6 +43,7 @@ async function seed() {
         passwordHash,
         role: "resident",
         unit: "12B",
+        directoryOptIn: true,
       },
     ])
     .returning();
@@ -107,8 +116,26 @@ async function seed() {
     description: "Main event space, seats up to 80.",
   });
 
+  await db.insert(wasteSchedules).values([
+    {
+      neighborhoodId: neighborhood.id,
+      type: "trash",
+      dayOfWeek: 2, // Tuesday
+      frequency: "weekly",
+      anchorDate: new Date(),
+      notes: "Bins out by 7am",
+    },
+    {
+      neighborhoodId: neighborhood.id,
+      type: "recycling",
+      dayOfWeek: 5, // Friday
+      frequency: "biweekly",
+      anchorDate: new Date(),
+    },
+  ]);
+
   console.log(
-    `Seeded neighborhood "${neighborhood.name}" with 2 users, 2 announcements, 2 events, 2 bulletin posts, and 2 amenities (${pool.name} + Clubhouse).`,
+    `Seeded neighborhood "${neighborhood.name}" with 2 users, 2 announcements, 2 events, 2 bulletin posts, 2 amenities (${pool.name} + Clubhouse), and 2 pickup schedules.`,
   );
   console.log(`Admin login: ${admin.email} / password123`);
   console.log(`Resident login: ${resident.email} / password123`);
