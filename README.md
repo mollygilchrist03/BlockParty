@@ -4,11 +4,27 @@ Your neighborhood's digital gathering place — events, announcements, a
 community bulletin board, amenity reservations, and a newsletter archive
 for residents and HOA boards.
 
+## Features
+
+- **Announcements** — board/admin post neighborhood-wide updates
+- **Events** — capacity-aware RSVPs; cancelling promotes the earliest
+  waitlisted registrant automatically
+- **Bulletin board** — yard sale / lost & found / recommendation / general
+  posts, filterable by category, moderated by authors + board/admin
+- **Amenity reservations** — book a time slot on a shared amenity (pool
+  cabana, clubhouse, courts); overlapping bookings are rejected
+- **Newsletter archive** — board/admin uploads a monthly PDF, residents
+  browse by month/year
+
+All of the above is scoped per neighborhood and gated by role
+(`resident` / `board` / `admin`).
+
 ## Stack
 
 - [Next.js](https://nextjs.org) (App Router) + TypeScript + Tailwind CSS v4
 - [Neon](https://neon.tech) serverless Postgres + [Drizzle ORM](https://orm.drizzle.team)
 - [Auth.js v5](https://authjs.dev) (Credentials provider, JWT sessions, role-based access)
+- [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) for newsletter PDF storage
 - Deployed on [Vercel](https://vercel.com)
 
 ## Getting started
@@ -54,7 +70,11 @@ Schema lives in `src/db/schema.ts`. Useful scripts:
 
 ## Deployment
 
-- **App** → Vercel. Set `DATABASE_URL` and `AUTH_SECRET` as environment
-  variables in the Vercel project settings.
+- **App** → Vercel. Set `DATABASE_URL`, `AUTH_SECRET`, and
+  `BLOB_READ_WRITE_TOKEN` as environment variables in the Vercel project
+  settings.
 - **Database** → Neon. Use a pooled connection string for serverless
   functions.
+- **File storage** → create a Blob store under the Vercel project's
+  Storage tab; it provisions `BLOB_READ_WRITE_TOKEN` automatically. Run
+  `vercel env pull` to get it locally.

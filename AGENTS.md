@@ -16,7 +16,8 @@ neighborhood with resident / board / admin roles.
 - Next.js (App Router) + TypeScript + Tailwind CSS v4
 - Neon Postgres + Drizzle ORM (`src/db/schema.ts`)
 - Auth.js v5 (NextAuth), Credentials provider, JWT sessions, role stored on
-  the JWT/session (`src/auth.ts`, `src/middleware.ts`)
+  the JWT/session (`src/auth.ts`, `src/proxy.ts`)
+- Vercel Blob for newsletter PDF storage (`@vercel/blob`, `BLOB_READ_WRITE_TOKEN`)
 - Deploy target: Vercel (app) + Neon (database)
 
 ## Local setup
@@ -37,7 +38,11 @@ Seeded logins (from `src/db/seed.ts`): `admin@maplegrove.test` /
 - All domain tables are scoped by `neighborhoodId` — new tables/queries
   should follow that pattern rather than assuming a single tenant.
 - Roles are `resident | board | admin` (Postgres enum in
-  `src/db/schema.ts`); `/admin/*` routes are gated in `src/middleware.ts`.
+  `src/db/schema.ts`); `src/proxy.ts` (the current Next.js "middleware"
+  convention) redirects unauthenticated users off `/dashboard/*` and
+  gates `/dashboard/admin` to board/admin. Individual board-only actions
+  (creating an event, amenity, announcement, or newsletter) also call
+  `requireBoard()` from `src/lib/session.ts` server-side.
 - Brand colors live as CSS variables in `src/app/globals.css`
   (`--color-navy #1F2937`, `--color-slate #334155`, `--color-sage #6BA58C`)
   and are usable as Tailwind classes (`bg-navy`, `text-sage`, etc.) via
