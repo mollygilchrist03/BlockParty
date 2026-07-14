@@ -1,43 +1,95 @@
 # BlockParty
 
-Your neighborhood's digital gathering place — events, announcements, a
-community bulletin board, amenity reservations, and a newsletter archive
-for residents and HOA boards.
+A neighborhood/HOA community platform, built to go past CRUD-tutorial
+territory into the parts of real SaaS that are actually hard: multi-tenant
+data isolation, role-based access enforced at more than one layer, a
+hybrid credentials + OAuth sign-in flow with a real onboarding handoff, and
+business logic with genuine edge cases — waitlists, booking conflicts,
+recurring schedules.
 
-## Features
+**Live demo:** [blockparty-zeta.vercel.app](https://blockparty-zeta.vercel.app)
 
-- **Announcements** — board/admin post neighborhood-wide updates
-- **Events** — capacity-aware RSVPs; cancelling promotes the earliest
-  waitlisted registrant automatically
-- **Bulletin board** — yard sale / lost & found / recommendation / general
-  posts, filterable by category, moderated by authors + board/admin
-- **Amenity reservations** — book a time slot on a shared amenity (pool
-  cabana, clubhouse, courts); overlapping bookings are rejected
-- **Newsletter archive** — board/admin uploads a monthly PDF, residents
-  browse by month/year
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@maplegrove.test` | `password123` |
+| Resident | `resident@maplegrove.test` | `password123` |
 
-All of the above is scoped per neighborhood and gated by role
+Residents can also sign in with Google — see [Sign-in model](#sign-in-model).
+
+![Landing page](docs/screenshots/landing.png)
+
+## What it does
+
+Events with capacity-aware RSVPs, neighborhood announcements, a bulletin
+board (yard sales, lost & found, recommendations), amenity reservations,
+a newsletter archive, an opt-in resident directory, and trash/recycling
+pickup schedules — all scoped to a neighborhood and gated by role
 (`resident` / `board` / `admin`).
 
-## Stack
+![Dashboard](docs/screenshots/dashboard.png)
 
-- [Next.js](https://nextjs.org) (App Router) + TypeScript + Tailwind CSS v4
-- [Neon](https://neon.tech) serverless Postgres + [Drizzle ORM](https://orm.drizzle.team)
-- [Auth.js v5](https://authjs.dev) — Credentials (admin/board) + Google OAuth
-  (residents), JWT sessions, role-based access
-- [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) for newsletter PDF storage
-- Deployed on [Vercel](https://vercel.com)
+## Notable engineering decisions
 
-### Sign-in model
+A few things here were built the harder-but-more-realistic way on purpose:
 
-- **Admin/board** accounts are provisioned directly (seed script or a future
-  admin invite flow) and sign in with email + password.
+- **Multi-tenancy.** Every domain table (`events`, `announcements`, `posts`,
+  `amenities`, `reservations`, `newsletters`, `waste_schedules`) carries a
+  `neighborhoodId`, and every query filters by the signed-in user's
+  neighborhood — see `src/db/schema.ts`. Nothing assumes a single tenant.
+- **Hybrid auth with real account linking.** Board/admin accounts sign in
+  with credentials; residents sign in with Google. A first-time Google
+  sign-in with no matching account doesn't get auto-enrolled — it's routed
+  to an onboarding step to pick a neighborhood, at which point a resident
+  account is created and, since there's no database-session adapter, the
+  *live* JWT is refreshed in place via `unstable_update()`. See
+  `src/auth.ts` and `src/app/onboarding/page.tsx`.
+- **Defense in depth on authorization.** Role checks happen at the edge
+  (`src/proxy.ts`, the current Next.js middleware convention) *and* again
+  inside every Server Action that mutates board-only data
+  (`requireBoard()` in `src/lib/session.ts`) — a bypassed redirect doesn't
+  mean a mutation gets through.
+- **Business logic with actual edge cases**, not just CRUD:
+  - Event RSVPs respect capacity; cancelling automatically promotes the
+    earliest waitlisted registrant (`src/app/dashboard/events/[id]/page.tsx`).
+  - Amenity reservations reject overlapping time slots — a real
+    interval-overlap check, not just "is this exact slot taken"
+    (`src/app/dashboard/amenities/[id]/page.tsx`).
+  - Recurring trash/recycling pickups compute the *next* date from a
+    day-of-week + weekly/biweekly frequency + anchor date. `src/lib/waste.ts`
+    is a small pure function, checked against a real calendar (Jul 17 → Jul
+    31 → Aug 14 for a biweekly Friday pickup).
+- **Real infrastructure, not mocks.** Neon serverless Postgres (via Drizzle
+  ORM) and Vercel Blob, provisioned through the Vercel Marketplace and
+  wired up with environment variables scoped separately across
+  Production/Preview/Development — not just a local SQLite file.
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Framework | [Next.js](https://nextjs.org) 16 (App Router) + TypeScript + Tailwind CSS v4 |
+| Database | [Neon](https://neon.tech) serverless Postgres + [Drizzle ORM](https://orm.drizzle.team) |
+| Auth | [Auth.js v5](https://authjs.dev) — Credentials (admin/board) + Google OAuth (residents), JWT sessions |
+| File storage | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) |
+| Hosting | [Vercel](https://vercel.com) |
+
+## Sign-in model
+
+- **Admin/board** accounts are provisioned directly (currently via the seed
+  script) and sign in with email + password.
 - **Residents** sign in with Google. The first time a Google account signs
   in with no matching `users` row, they land on `/onboarding` to pick their
-  neighborhood from a list before a resident account is created for them —
-  see the `jwt`/`signIn` callbacks in `src/auth.ts`.
+  neighborhood from an interactive card picker before a resident account
+  is created for them — see the `jwt`/`signIn` callbacks in `src/auth.ts`.
 
-## Getting started
+<table>
+<tr>
+<td><img src="docs/screenshots/login.png" alt="Login page" width="400"></td>
+<td><img src="docs/screenshots/events.png" alt="Events with RSVP" width="400"></td>
+</tr>
+</table>
+
+## Local setup
 
 1. Install dependencies:
 
@@ -66,8 +118,7 @@ All of the above is scoped per neighborhood and gated by role
    ```
 
    Open [http://localhost:3000](http://localhost:3000). Sign in with the
-   seeded accounts (`admin@maplegrove.test` / `resident@maplegrove.test`,
-   password `password123`).
+   seeded accounts above.
 
 ## Database
 
@@ -98,3 +149,15 @@ Schema lives in `src/db/schema.ts`. Useful scripts:
 - **File storage** → create a Blob store under the Vercel project's
   Storage tab; it provisions `BLOB_READ_WRITE_TOKEN` automatically. Run
   `vercel env pull` to get it locally.
+
+## What's next
+
+Things I'd tackle if this kept growing past a portfolio piece:
+
+- A real admin-invite flow instead of seed-script-only account provisioning
+- Automated tests — currently leans on `tsc`, `next build`, and
+  scripted/manual browser verification for each change
+- Full dark mode support (currently forced to light; see the comment in
+  `src/app/globals.css` for why)
+- Database migrations instead of `drizzle-kit push` once there's real user
+  data to protect
