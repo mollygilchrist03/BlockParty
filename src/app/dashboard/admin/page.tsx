@@ -44,6 +44,15 @@ export default async function AdminPage() {
             Add a monthly newsletter PDF to the archive.
           </p>
         </Link>
+        <Link
+          href="/dashboard/schedule/new"
+          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
+        >
+          <h2 className="font-semibold text-navy">Add a pickup schedule</h2>
+          <p className="mt-1 text-sm text-slate">
+            Set the trash, recycling, or bulk pickup day.
+          </p>
+        </Link>
       </div>
     </div>
   );

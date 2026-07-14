@@ -37,6 +37,12 @@ export default async function DashboardLayout({
             <Link href="/dashboard/newsletters" className="hover:text-sage">
               Newsletters
             </Link>
+            <Link href="/dashboard/directory" className="hover:text-sage">
+              Directory
+            </Link>
+            <Link href="/dashboard/schedule" className="hover:text-sage">
+              Trash &amp; recycling
+            </Link>
             {isBoard && (
               <Link href="/dashboard/admin" className="hover:text-sage">
                 Admin
@@ -44,19 +50,27 @@ export default async function DashboardLayout({
             )}
           </nav>
         </div>
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/" });
-          }}
-        >
-          <button
-            type="submit"
+        <div className="flex items-center gap-4">
+          <Link
+            href="/dashboard/settings"
             className="text-sm font-medium text-slate hover:text-navy"
           >
-            Sign out
-          </button>
-        </form>
+            Settings
+          </Link>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}
+          >
+            <button
+              type="submit"
+              className="text-sm font-medium text-slate hover:text-navy"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
       <main className="flex flex-1 flex-col">{children}</main>
     </div>

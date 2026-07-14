@@ -55,6 +55,24 @@ export default async function DashboardPage() {
             Browse the monthly newsletter archive.
           </p>
         </Link>
+        <Link
+          href="/dashboard/directory"
+          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
+        >
+          <h2 className="font-semibold text-navy">Directory</h2>
+          <p className="mt-1 text-sm text-slate">
+            Find neighbors who&apos;ve opted into the directory.
+          </p>
+        </Link>
+        <Link
+          href="/dashboard/schedule"
+          className="rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
+        >
+          <h2 className="font-semibold text-navy">Trash &amp; recycling</h2>
+          <p className="mt-1 text-sm text-slate">
+            Check the next pickup day.
+          </p>
+        </Link>
       </div>
     </div>
   );
