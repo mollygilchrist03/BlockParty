@@ -101,7 +101,7 @@ export default async function AmenityDetailPage({
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate/10 bg-white p-6">
+      <div className="card">
         <h2 className="font-semibold text-navy">Reserve a time slot</h2>
         {error === "conflict" && (
           <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
@@ -119,26 +119,13 @@ export default async function AmenityDetailPage({
         >
           <label className="flex flex-col gap-1 text-sm text-slate">
             Starts at
-            <input
-              type="datetime-local"
-              name="startsAt"
-              required
-              className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-            />
+            <input type="datetime-local" name="startsAt" required className="field" />
           </label>
           <label className="flex flex-col gap-1 text-sm text-slate">
             Ends at
-            <input
-              type="datetime-local"
-              name="endsAt"
-              required
-              className="rounded-lg border border-slate/20 px-3 py-2 text-navy outline-none focus:border-sage"
-            />
+            <input type="datetime-local" name="endsAt" required className="field" />
           </label>
-          <button
-            type="submit"
-            className="self-start rounded-full bg-navy px-5 py-2 text-sm font-medium text-white hover:bg-slate sm:col-span-2"
-          >
+          <button type="submit" className="btn-primary self-start sm:col-span-2">
             Reserve
           </button>
         </form>
@@ -153,7 +140,7 @@ export default async function AmenityDetailPage({
             {upcoming.map((reservation) => (
               <li
                 key={reservation.id}
-                className="flex items-center justify-between rounded-xl border border-slate/10 bg-white px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-slate-900/8 bg-white px-4 py-3 shadow-sm shadow-slate-900/5"
               >
                 <div>
                   <p className="text-sm font-medium text-navy">
@@ -166,7 +153,7 @@ export default async function AmenityDetailPage({
                       timeStyle: "short",
                     })}
                   </p>
-                  <p className="text-xs text-slate/60">
+                  <p className="text-xs text-muted">
                     {reservation.userId === user.id ? "You" : reservation.userName}
                   </p>
                 </div>
@@ -174,7 +161,7 @@ export default async function AmenityDetailPage({
                   <form action={cancelReservation.bind(null, reservation.id)}>
                     <button
                       type="submit"
-                      className="text-xs font-medium text-slate/60 hover:text-red-600"
+                      className="text-xs font-medium text-muted hover:text-red-600"
                     >
                       Cancel
                     </button>
