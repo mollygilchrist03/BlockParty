@@ -54,10 +54,7 @@ export default async function SchedulePage() {
           Trash &amp; recycling
         </h1>
         {boardOnlyRoles.includes(user.role) && (
-          <Link
-            href="/dashboard/schedule/new"
-            className="rounded-full bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-slate"
-          >
+          <Link href="/dashboard/schedule/new" className="btn-primary">
             New schedule
           </Link>
         )}
@@ -68,10 +65,7 @@ export default async function SchedulePage() {
       ) : (
         <ul className="flex flex-col gap-4">
           {withNextPickup.map((schedule) => (
-            <li
-              key={schedule.id}
-              className="rounded-2xl border border-slate/10 bg-white p-6"
-            >
+            <li key={schedule.id} className="card">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <span className="inline-block rounded-full bg-sage-light px-2 py-0.5 text-xs font-medium text-sage">
@@ -97,7 +91,7 @@ export default async function SchedulePage() {
                   <form action={deleteSchedule.bind(null, schedule.id)}>
                     <button
                       type="submit"
-                      className="text-xs font-medium text-slate/60 hover:text-red-600"
+                      className="text-xs font-medium text-muted hover:text-red-600"
                     >
                       Delete
                     </button>

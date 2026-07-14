@@ -32,7 +32,7 @@ export default async function SettingsPage() {
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">Settings</h1>
 
-      <div className="rounded-2xl border border-slate/10 bg-white p-6">
+      <div className="card">
         <h2 className="font-semibold text-navy">Community directory</h2>
         <p className="mt-1 text-sm text-slate">
           When enabled, your name and unit are visible to other residents on
@@ -52,10 +52,7 @@ export default async function SettingsPage() {
             />
             List me in the community directory
           </label>
-          <button
-            type="submit"
-            className="mt-4 rounded-full bg-navy px-5 py-2 text-sm font-medium text-white hover:bg-slate"
-          >
+          <button type="submit" className="btn-primary mt-4">
             Save
           </button>
         </form>

@@ -19,10 +19,7 @@ export default async function AmenitiesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-navy">Amenities</h1>
         {boardOnlyRoles.includes(user.role) && (
-          <Link
-            href="/dashboard/amenities/new"
-            className="rounded-full bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-slate"
-          >
+          <Link href="/dashboard/amenities/new" className="btn-primary">
             New amenity
           </Link>
         )}
@@ -36,7 +33,7 @@ export default async function AmenitiesPage() {
             <li key={amenity.id}>
               <Link
                 href={`/dashboard/amenities/${amenity.id}`}
-                className="block rounded-2xl border border-slate/10 bg-white p-6 transition-colors hover:border-sage"
+                className="card card-link block"
               >
                 <h2 className="font-semibold text-navy">{amenity.name}</h2>
                 {amenity.description && (

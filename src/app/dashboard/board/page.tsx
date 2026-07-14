@@ -63,10 +63,7 @@ export default async function BulletinBoardPage({
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-12 sm:px-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-navy">Bulletin board</h1>
-        <Link
-          href="/dashboard/board/new"
-          className="rounded-full bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-slate"
-        >
+        <Link href="/dashboard/board/new" className="btn-primary">
           New post
         </Link>
       </div>
@@ -74,8 +71,10 @@ export default async function BulletinBoardPage({
       <div className="flex flex-wrap gap-2 text-sm">
         <Link
           href="/dashboard/board"
-          className={`rounded-full px-3 py-1 ${
-            !activeCategory ? "bg-navy text-white" : "bg-white text-slate border border-slate/20"
+          className={`rounded-full px-3 py-1 font-medium transition-colors ${
+            !activeCategory
+              ? "bg-navy text-white"
+              : "border border-slate/20 bg-white text-slate hover:border-sage hover:text-sage"
           }`}
         >
           All
@@ -84,10 +83,10 @@ export default async function BulletinBoardPage({
           <Link
             key={c.value}
             href={`/dashboard/board?category=${c.value}`}
-            className={`rounded-full px-3 py-1 ${
+            className={`rounded-full px-3 py-1 font-medium transition-colors ${
               activeCategory === c.value
                 ? "bg-navy text-white"
-                : "bg-white text-slate border border-slate/20"
+                : "border border-slate/20 bg-white text-slate hover:border-sage hover:text-sage"
             }`}
           >
             {c.label}
@@ -103,10 +102,7 @@ export default async function BulletinBoardPage({
             const canDelete =
               post.authorId === user.id || boardOnlyRoles.includes(user.role);
             return (
-              <li
-                key={post.id}
-                className="rounded-2xl border border-slate/10 bg-white p-6"
-              >
+              <li key={post.id} className="card">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <span className="inline-block rounded-full bg-sage-light px-2 py-0.5 text-xs font-medium text-sage">
@@ -114,7 +110,7 @@ export default async function BulletinBoardPage({
                     </span>
                     <h2 className="mt-2 font-semibold text-navy">{post.title}</h2>
                   </div>
-                  <time className="shrink-0 text-xs text-slate/60">
+                  <time className="shrink-0 text-xs text-muted">
                     {post.createdAt.toLocaleDateString()}
                   </time>
                 </div>
@@ -123,7 +119,7 @@ export default async function BulletinBoardPage({
                   <form action={deletePost.bind(null, post.id)} className="mt-3">
                     <button
                       type="submit"
-                      className="text-xs font-medium text-slate/60 hover:text-red-600"
+                      className="text-xs font-medium text-muted hover:text-red-600"
                     >
                       Delete
                     </button>

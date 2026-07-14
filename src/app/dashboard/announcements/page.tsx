@@ -27,10 +27,7 @@ export default async function AnnouncementsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-navy">Announcements</h1>
         {boardOnlyRoles.includes(user.role) && (
-          <Link
-            href="/dashboard/announcements/new"
-            className="rounded-full bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-slate"
-          >
+          <Link href="/dashboard/announcements/new" className="btn-primary">
             New announcement
           </Link>
         )}
@@ -41,20 +38,17 @@ export default async function AnnouncementsPage() {
       ) : (
         <ul className="flex flex-col gap-4">
           {rows.map((announcement) => (
-            <li
-              key={announcement.id}
-              className="rounded-2xl border border-slate/10 bg-white p-6"
-            >
+            <li key={announcement.id} className="card">
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="font-semibold text-navy">{announcement.title}</h2>
-                <time className="shrink-0 text-xs text-slate/60">
+                <time className="shrink-0 text-xs text-muted">
                   {announcement.createdAt.toLocaleDateString()}
                 </time>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-slate">
                 {announcement.body}
               </p>
-              <p className="mt-3 text-xs text-slate/60">
+              <p className="mt-3 text-xs text-muted">
                 Posted by {announcement.authorName}
               </p>
             </li>
