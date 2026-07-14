@@ -47,7 +47,7 @@ export const users = pgTable("users", {
   }),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  passwordHash: varchar("password_hash", { length: 255 }),
   role: roleEnum("role").notNull().default("resident"),
   unit: varchar("unit", { length: 100 }),
   directoryOptIn: boolean("directory_opt_in").notNull().default(false),
