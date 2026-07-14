@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
+  --background: #eef2f6;
   --foreground: #1f2937;
 
   --color-navy: #1f2937;
   --color-slate: #334155;
-  --color-sage: #6ba58c;
-  --color-sage-light: #e6f0ea;
+  --color-muted: #64748b;
+  --color-sage: #2f6f4e;
+  --color-sage-light: #e3f1e9;
 }
 
 @theme inline {
@@ -15,21 +16,46 @@
   --color-foreground: var(--foreground);
   --color-navy: var(--color-navy);
   --color-slate: var(--color-slate);
+  --color-muted: var(--color-muted);
   --color-sage: var(--color-sage);
   --color-sage-light: var(--color-sage-light);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #e2e8f0;
-  }
+/*
+  Brand colors (navy/slate/sage) are only defined for light backgrounds.
+  Forcing color-scheme here opts out of the OS/browser's automatic dark
+  mode instead of silently rendering near-invisible text — proper dark
+  mode needs its own pass across every hardcoded `bg-white` card.
+*/
+:root {
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-slate-900/8 bg-white p-6 shadow-sm shadow-slate-900/5;
+  }
+  .card-link {
+    @apply transition-all duration-150 hover:-translate-y-0.5 hover:border-sage/40 hover:shadow-md hover:shadow-sage/10;
+  }
+  .field {
+    @apply w-full rounded-lg border border-slate/20 bg-white px-3 py-2 text-navy outline-none transition-shadow focus:border-sage focus:ring-2 focus:ring-sage/15;
+  }
+  .btn-primary {
+    @apply rounded-full bg-navy px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate;
+  }
+  .btn-secondary {
+    @apply rounded-full border border-slate/20 bg-white px-5 py-2 text-sm font-medium text-slate transition-colors hover:border-sage hover:text-sage;
+  }
+  .eyebrow {
+    @apply text-sm font-medium text-sage;
+  }
 }
