@@ -35,7 +35,7 @@ export function DashboardNav({
             {link.label}
           </Link>
         ))}
-        {isBoard && !isOwner && (
+        {isBoard && (
           <Link
             href="/dashboard/admin"
             className="rounded-full bg-sage-light px-3 py-1 text-sage transition-colors hover:bg-sage hover:text-white"
@@ -115,7 +115,7 @@ export function DashboardNav({
                 {link.label}
               </Link>
             ))}
-            {isBoard && !isOwner && (
+            {isBoard && (
               <Link
                 href="/dashboard/admin"
                 onClick={() => setOpen(false)}
