@@ -294,8 +294,43 @@ export default async function Home({
         </section>
       </main>
 
-      <footer className="border-t border-slate-900/5 px-6 py-6 text-center text-sm text-muted sm:px-10">
-        BlockParty — built with Next.js, Neon Postgres &amp; Drizzle ORM.
+      <footer className="border-t border-slate-900/5 px-6 py-10 sm:px-10">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
+          <div className="flex flex-col items-center gap-2 sm:items-start">
+            <div className="flex items-center gap-2">
+              <Image src="/logo.svg" alt="" width={22} height={22} />
+              <span className="text-sm font-semibold text-navy">BlockParty</span>
+            </div>
+            <p className="max-w-xs text-sm text-muted">
+              A neighborhood/HOA community platform, built as a portfolio
+              project.
+            </p>
+          </div>
+
+          <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate sm:justify-end">
+            <a href="#features" className="hover:text-sage">
+              Features
+            </a>
+            <a href="#request" className="hover:text-sage">
+              Request access
+            </a>
+            <Link href="/login" className="hover:text-sage">
+              Sign in
+            </Link>
+            <a
+              href="https://github.com/mollygilchrist03/BlockParty"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-sage"
+            >
+              GitHub<span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </nav>
+        </div>
+
+        <p className="mx-auto mt-8 w-full max-w-5xl border-t border-slate-900/5 pt-6 text-center text-sm text-muted">
+          {`© ${new Date().getFullYear()} BlockParty. Built with Next.js, Neon Postgres & Drizzle ORM.`}
+        </p>
       </footer>
     </div>
   );
