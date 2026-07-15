@@ -70,6 +70,19 @@ export default async function OwnerPage({
     .where(inArray(users.role, ["board", "admin"]))
     .orderBy(asc(neighborhoods.name), asc(users.name));
 
+  const residents = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      unit: users.unit,
+      neighborhoodName: neighborhoods.name,
+    })
+    .from(users)
+    .innerJoin(neighborhoods, eq(users.neighborhoodId, neighborhoods.id))
+    .where(eq(users.role, "resident"))
+    .orderBy(asc(neighborhoods.name), asc(users.name));
+
   const banner = created
     ? createdCopy[created]
     : updated
@@ -159,6 +172,34 @@ export default async function OwnerPage({
                     <p className="text-muted">{roleLabels[person.role] ?? person.role}</p>
                   </div>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-navy">Residents</h2>
+          <span className="text-sm text-muted">{residents.length} total</span>
+        </div>
+        {residents.length === 0 ? (
+          <p className="text-slate">No residents yet.</p>
+        ) : (
+          <ul className="divide-y divide-slate/10 overflow-hidden rounded-2xl border border-slate-900/8 bg-white shadow-sm shadow-slate-900/5">
+            {residents.map((person) => (
+              <li
+                key={person.id}
+                className="flex items-center justify-between px-6 py-4"
+              >
+                <div>
+                  <p className="font-medium text-navy">{person.name}</p>
+                  <p className="text-sm text-muted">{person.email}</p>
+                </div>
+                <div className="text-right text-sm">
+                  <p className="font-medium text-slate">{person.neighborhoodName}</p>
+                  <p className="text-muted">{person.unit ?? "—"}</p>
+                </div>
               </li>
             ))}
           </ul>
