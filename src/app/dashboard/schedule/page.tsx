@@ -5,8 +5,7 @@ import { db } from "@/db";
 import { wasteSchedules } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { nextPickupDate } from "@/lib/waste";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles } from "@/lib/roles";
 
 const typeLabels: Record<string, string> = {
   trash: "Trash",

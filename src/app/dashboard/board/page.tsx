@@ -4,8 +4,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { requireUser } from "@/lib/session";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles } from "@/lib/roles";
 
 const categories = [
   { value: "yard_sale", label: "Yard sale" },

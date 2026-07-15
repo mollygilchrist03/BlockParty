@@ -3,8 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { amenities } from "@/db/schema";
 import { requireUser } from "@/lib/session";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles } from "@/lib/roles";
 
 export default async function AmenitiesPage() {
   const user = await requireUser();

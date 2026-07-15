@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "@/auth";
 import { requireUser } from "@/lib/session";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles, ownerOnlyRoles } from "@/lib/roles";
 
 export default async function DashboardLayout({
   children,
@@ -12,6 +11,7 @@ export default async function DashboardLayout({
 }) {
   const user = await requireUser();
   const isBoard = boardOnlyRoles.includes(user.role);
+  const isOwner = ownerOnlyRoles.includes(user.role);
 
   return (
     <div className="flex flex-1 flex-col bg-background">
@@ -44,12 +44,20 @@ export default async function DashboardLayout({
               <Link href="/dashboard/schedule" className="transition-colors hover:text-sage">
                 Trash &amp; recycling
               </Link>
-              {isBoard && (
+              {isBoard && !isOwner && (
                 <Link
                   href="/dashboard/admin"
                   className="rounded-full bg-sage-light px-3 py-1 text-sage transition-colors hover:bg-sage hover:text-white"
                 >
                   Admin
+                </Link>
+              )}
+              {isOwner && (
+                <Link
+                  href="/dashboard/owner"
+                  className="rounded-full bg-navy px-3 py-1 text-white transition-colors hover:bg-slate"
+                >
+                  Owner
                 </Link>
               )}
             </nav>

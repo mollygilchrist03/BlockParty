@@ -3,8 +3,7 @@ import { and, asc, count, eq, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { eventRegistrations, events } from "@/db/schema";
 import { requireUser } from "@/lib/session";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles } from "@/lib/roles";
 
 export default async function EventsPage() {
   const user = await requireUser();

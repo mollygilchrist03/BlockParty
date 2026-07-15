@@ -3,8 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { announcements, users } from "@/db/schema";
 import { requireUser } from "@/lib/session";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles } from "@/lib/roles";
 
 export default async function AnnouncementsPage() {
   const user = await requireUser();

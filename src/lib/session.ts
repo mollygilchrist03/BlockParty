@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles, ownerOnlyRoles } from "./roles";
 
 export async function requireUser() {
   const session = await auth();
@@ -12,5 +11,11 @@ export async function requireUser() {
 export async function requireBoard() {
   const user = await requireUser();
   if (!boardOnlyRoles.includes(user.role)) redirect("/dashboard");
+  return user;
+}
+
+export async function requireOwner() {
+  const user = await requireUser();
+  if (!ownerOnlyRoles.includes(user.role)) redirect("/dashboard");
   return user;
 }

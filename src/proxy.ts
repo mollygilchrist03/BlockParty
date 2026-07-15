@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-
-const boardOnlyRoles = ["board", "admin"];
+import { boardOnlyRoles, ownerOnlyRoles } from "@/lib/roles";
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -19,6 +18,13 @@ export default auth((req) => {
     if (role !== "pending" && pathname === "/onboarding") {
       return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
     }
+  }
+
+  if (
+    pathname.startsWith("/dashboard/owner") &&
+    !ownerOnlyRoles.includes(role ?? "")
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
   if (
