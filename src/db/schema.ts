@@ -31,6 +31,11 @@ export const scheduleFrequencyEnum = pgEnum("schedule_frequency", [
   "weekly",
   "biweekly",
 ]);
+export const requestStatusEnum = pgEnum("request_status", [
+  "pending",
+  "approved",
+  "denied",
+]);
 
 export const neighborhoods = pgTable("neighborhoods", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -151,6 +156,17 @@ export const wasteSchedules = pgTable("waste_schedules", {
   frequency: scheduleFrequencyEnum("frequency").notNull().default("weekly"),
   anchorDate: timestamp("anchor_date").notNull(),
   notes: varchar("notes", { length: 255 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const neighborhoodRequests = pgTable("neighborhood_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  neighborhoodName: varchar("neighborhood_name", { length: 255 }).notNull(),
+  address: varchar("address", { length: 255 }),
+  requesterName: varchar("requester_name", { length: 255 }).notNull(),
+  requesterEmail: varchar("requester_email", { length: 255 }).notNull(),
+  message: text("message"),
+  status: requestStatusEnum("status").notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
