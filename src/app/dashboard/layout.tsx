@@ -21,14 +21,12 @@ export default async function DashboardLayout({
   const isBoard = boardOnlyRoles.includes(user.role);
   const isOwner = ownerOnlyRoles.includes(user.role);
 
-  const [me] = user.neighborhoodId
-    ? await db
-        .select({ unit: users.unit, neighborhoodName: neighborhoods.name })
-        .from(users)
-        .innerJoin(neighborhoods, eq(users.neighborhoodId, neighborhoods.id))
-        .where(eq(users.id, user.id))
-        .limit(1)
-    : [];
+  const [me] = await db
+    .select({ unit: users.unit, avatarUrl: users.avatarUrl, neighborhoodName: neighborhoods.name })
+    .from(users)
+    .leftJoin(neighborhoods, eq(users.neighborhoodId, neighborhoods.id))
+    .where(eq(users.id, user.id))
+    .limit(1);
 
   const userSubtitle = me?.unit || me?.neighborhoodName || roleLabels[user.role] || "";
 
@@ -45,6 +43,7 @@ export default async function DashboardLayout({
         isOwner={isOwner}
         userName={user.name ?? "Neighbor"}
         userSubtitle={userSubtitle}
+        avatarUrl={me?.avatarUrl}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <main id="main-content" className="flex flex-1 flex-col">
