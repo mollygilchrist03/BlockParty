@@ -2,11 +2,11 @@ import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { announcements, users } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { requireNeighborhoodUser } from "@/lib/session";
 import { boardOnlyRoles } from "@/lib/roles";
 
 export default async function AnnouncementsPage() {
-  const user = await requireUser();
+  const user = await requireNeighborhoodUser();
 
   const rows = await db
     .select({
@@ -18,7 +18,7 @@ export default async function AnnouncementsPage() {
     })
     .from(announcements)
     .innerJoin(users, eq(announcements.authorId, users.id))
-    .where(eq(announcements.neighborhoodId, user.neighborhoodId ?? ""))
+    .where(eq(announcements.neighborhoodId, user.neighborhoodId))
     .orderBy(desc(announcements.createdAt));
 
   return (

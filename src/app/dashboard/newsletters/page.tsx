@@ -2,7 +2,7 @@ import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { newsletters } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { requireNeighborhoodUser } from "@/lib/session";
 import { boardOnlyRoles } from "@/lib/roles";
 
 const monthNames = [
@@ -11,12 +11,12 @@ const monthNames = [
 ];
 
 export default async function NewslettersPage() {
-  const user = await requireUser();
+  const user = await requireNeighborhoodUser();
 
   const rows = await db
     .select()
     .from(newsletters)
-    .where(eq(newsletters.neighborhoodId, user.neighborhoodId ?? ""))
+    .where(eq(newsletters.neighborhoodId, user.neighborhoodId))
     .orderBy(desc(newsletters.year), desc(newsletters.month));
 
   return (

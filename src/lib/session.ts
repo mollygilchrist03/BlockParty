@@ -19,3 +19,16 @@ export async function requireOwner() {
   if (!ownerOnlyRoles.includes(user.role)) redirect("/dashboard");
   return user;
 }
+
+/**
+ * For pages scoped to a single neighborhood's day-to-day content
+ * (announcements, events, etc). The owner role isn't tied to any
+ * neighborhood, so `neighborhoodId` would otherwise be null here —
+ * redirect rather than let a `null` flow into a uuid query param.
+ */
+export async function requireNeighborhoodUser() {
+  const user = await requireUser();
+  const { neighborhoodId } = user;
+  if (!neighborhoodId) redirect("/dashboard/owner");
+  return { ...user, neighborhoodId };
+}

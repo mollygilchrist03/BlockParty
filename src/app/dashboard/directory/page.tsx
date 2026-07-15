@@ -2,17 +2,17 @@ import Link from "next/link";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { requireNeighborhoodUser } from "@/lib/session";
 
 export default async function DirectoryPage() {
-  const user = await requireUser();
+  const user = await requireNeighborhoodUser();
 
   const rows = await db
     .select({ id: users.id, name: users.name, unit: users.unit })
     .from(users)
     .where(
       and(
-        eq(users.neighborhoodId, user.neighborhoodId ?? ""),
+        eq(users.neighborhoodId, user.neighborhoodId),
         eq(users.directoryOptIn, true),
       ),
     )

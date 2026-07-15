@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { wasteSchedules } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { requireNeighborhoodUser, requireUser } from "@/lib/session";
 import { nextPickupDate } from "@/lib/waste";
 import { boardOnlyRoles } from "@/lib/roles";
 
@@ -28,12 +28,12 @@ async function deleteSchedule(scheduleId: string) {
 }
 
 export default async function SchedulePage() {
-  const user = await requireUser();
+  const user = await requireNeighborhoodUser();
 
   const rows = await db
     .select()
     .from(wasteSchedules)
-    .where(eq(wasteSchedules.neighborhoodId, user.neighborhoodId ?? ""));
+    .where(eq(wasteSchedules.neighborhoodId, user.neighborhoodId));
 
   const withNextPickup = rows
     .map((schedule) => ({

@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { requireNeighborhoodUser, requireUser } from "@/lib/session";
 import { boardOnlyRoles } from "@/lib/roles";
 
 const categories = [
@@ -36,7 +36,7 @@ export default async function BulletinBoardPage({
 }: {
   searchParams: Promise<{ category?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireNeighborhoodUser();
   const { category } = await searchParams;
 
   const activeCategory = categories.find((c) => c.value === category)?.value;
@@ -53,8 +53,8 @@ export default async function BulletinBoardPage({
     .from(posts)
     .where(
       activeCategory
-        ? and(eq(posts.neighborhoodId, user.neighborhoodId ?? ""), eq(posts.category, activeCategory))
-        : eq(posts.neighborhoodId, user.neighborhoodId ?? ""),
+        ? and(eq(posts.neighborhoodId, user.neighborhoodId), eq(posts.category, activeCategory))
+        : eq(posts.neighborhoodId, user.neighborhoodId),
     )
     .orderBy(desc(posts.createdAt));
 
