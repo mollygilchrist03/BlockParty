@@ -10,7 +10,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum("role", ["resident", "board", "admin"]);
+export const roleEnum = pgEnum("role", ["resident", "board", "admin", "owner"]);
 export const rsvpStatusEnum = pgEnum("rsvp_status", [
   "registered",
   "waitlisted",
