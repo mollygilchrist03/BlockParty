@@ -24,7 +24,7 @@ Events with capacity-aware RSVPs, neighborhood announcements, a bulletin
 board (yard sales, lost & found, recommendations), amenity reservations,
 a newsletter archive, an opt-in resident directory, and trash/recycling
 pickup schedules — all scoped to a neighborhood and gated by role
-(`resident` / `board` / `admin`).
+(`resident` / `board` / `admin`, plus a platform-level `owner`).
 
 ![Dashboard](docs/screenshots/dashboard.png)
 
@@ -62,6 +62,12 @@ A few things here were built the harder-but-more-realistic way on purpose:
   ORM) and Vercel Blob, provisioned through the Vercel Marketplace and
   wired up with environment variables scoped separately across
   Production/Preview/Development — not just a local SQLite file.
+- **A platform tier above the tenants.** A fourth role, `owner`, sits above
+  `resident`/`board`/`admin` and isn't scoped to any neighborhood — it's
+  auto-provisioned for one specific email (`OWNER_EMAIL`) on Google
+  sign-in, and provisions new neighborhoods and HOA admin accounts from
+  `/dashboard/owner`. This is the same shape as how most real multi-tenant
+  SaaS onboards new customers/orgs.
 
 ## Tech stack
 
@@ -75,8 +81,13 @@ A few things here were built the harder-but-more-realistic way on purpose:
 
 ## Sign-in model
 
-- **Admin/board** accounts are provisioned directly (currently via the seed
-  script) and sign in with email + password.
+- **Owner** — one specific Google account (set via `OWNER_EMAIL`) is
+  auto-provisioned/promoted to `owner` on sign-in. Not tied to any
+  neighborhood; manages neighborhoods and HOA admin accounts from
+  `/dashboard/owner`.
+- **Admin/board** accounts are provisioned by the owner (via
+  `/dashboard/owner/admins/new`, or the seed script for local dev) and sign
+  in with email + password.
 - **Residents** sign in with Google. The first time a Google account signs
   in with no matching `users` row, they land on `/onboarding` to pick their
   neighborhood from an interactive card picker before a resident account
@@ -138,12 +149,16 @@ Schema lives in `src/db/schema.ts`. Useful scripts:
    - `https://<your-production-domain>/api/auth/callback/google`
 3. Copy the client ID/secret into `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`
    (`.env.local` for dev, Vercel project env vars for prod).
+4. Set `OWNER_EMAIL` to whichever Google account should be the platform
+   owner. While the app is in Google's "Testing" publishing status, only
+   emails added as test users on the OAuth consent screen can sign in at
+   all — add that owner email (and any resident test accounts) there.
 
 ## Deployment
 
 - **App** → Vercel. Set `DATABASE_URL`, `AUTH_SECRET`,
-  `BLOB_READ_WRITE_TOKEN`, `AUTH_GOOGLE_ID`, and `AUTH_GOOGLE_SECRET` as
-  environment variables in the Vercel project settings.
+  `BLOB_READ_WRITE_TOKEN`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, and
+  `OWNER_EMAIL` as environment variables in the Vercel project settings.
 - **Database** → Neon. Use a pooled connection string for serverless
   functions.
 - **File storage** → create a Blob store under the Vercel project's
@@ -154,7 +169,9 @@ Schema lives in `src/db/schema.ts`. Useful scripts:
 
 Things I'd tackle if this kept growing past a portfolio piece:
 
-- A real admin-invite flow instead of seed-script-only account provisioning
+- Email delivery for new HOA admin accounts (owner currently sets a
+  temporary password directly; there's no "forgot password" or invite
+  email flow yet)
 - Automated tests — currently leans on `tsc`, `next build`, and
   scripted/manual browser verification for each change
 - Full dark mode support (currently forced to light; see the comment in

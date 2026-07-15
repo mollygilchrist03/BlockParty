@@ -9,7 +9,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 A neighborhood/HOA community platform: events with RSVPs, announcements, a
 bulletin board (yard sales, lost & found), amenity reservations, a
 newsletter archive, and trash/recycling schedules — scoped per
-neighborhood with resident / board / admin roles.
+neighborhood with resident / board / admin roles, plus a platform-level
+owner role that provisions neighborhoods and HOA admins.
 
 ## Stack
 
@@ -33,21 +34,31 @@ npm run dev
 
 Seeded logins (from `src/db/seed.ts`): `admin@maplegrove.test` /
 `resident@maplegrove.test`, password `password123` for both. Google sign-in
-needs `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` — see README for setup.
+needs `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`; being the owner needs
+`OWNER_EMAIL` set to your Google account — see README for setup.
 
 ## Conventions
 
 - All domain tables are scoped by `neighborhoodId` — new tables/queries
   should follow that pattern rather than assuming a single tenant.
-- Roles are `resident | board | admin` (Postgres enum in
+- Roles are `resident | board | admin | owner` (Postgres enum in
   `src/db/schema.ts`), plus a JWT-only `"pending"` role that's never
   persisted — set in `src/auth.ts`'s `jwt` callback for a first-time
-  Google sign-in with no matching `users` row. `src/proxy.ts` (the
-  current Next.js "middleware" convention) routes `pending` users to
-  `/onboarding`, redirects unauthenticated users off `/dashboard/*`, and
-  gates `/dashboard/admin` to board/admin. Individual board-only actions
-  (creating an event, amenity, announcement, or newsletter) also call
-  `requireBoard()` from `src/lib/session.ts` server-side.
+  Google sign-in with no matching `users` row. `src/lib/roles.ts` exports
+  `boardOnlyRoles`/`ownerOnlyRoles` — import them rather than re-declaring
+  role arrays locally. `src/proxy.ts` (the current Next.js "middleware"
+  convention) routes `pending` users to `/onboarding`, redirects
+  unauthenticated users off `/dashboard/*`, gates `/dashboard/admin` to
+  board/admin/owner, and gates `/dashboard/owner` to owner only.
+  Individual board-only actions (creating an event, amenity, announcement,
+  or newsletter) also call `requireBoard()` from `src/lib/session.ts`
+  server-side; owner-only actions call `requireOwner()`.
+- `owner` is a platform-level role, not scoped to a neighborhood
+  (`neighborhoodId` is null). Whichever Google account's email matches
+  `OWNER_EMAIL` gets auto-provisioned/promoted to `owner` in `jwt()` —
+  there's no other way to become owner. From `/dashboard/owner` they
+  create neighborhoods and HOA admin/board accounts (with a temporary
+  password owner sets directly; no invite-email flow exists yet).
 - `users.passwordHash` is nullable — Google-only residents never get one.
   Credentials `authorize()` must reject sign-in if it's null rather than
   passing `null` to `bcryptjs.compare()`.
