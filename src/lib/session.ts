@@ -10,13 +10,19 @@ export async function requireUser() {
 
 export async function requireBoard() {
   const user = await requireUser();
-  if (!boardOnlyRoles.includes(user.role)) redirect("/dashboard");
+  if (!boardOnlyRoles.includes(user.role)) {
+    console.warn(`[access-control] denied board-only route to ${user.email} (role: ${user.role})`);
+    redirect("/dashboard");
+  }
   return user;
 }
 
 export async function requireOwner() {
   const user = await requireUser();
-  if (!ownerOnlyRoles.includes(user.role)) redirect("/dashboard");
+  if (!ownerOnlyRoles.includes(user.role)) {
+    console.warn(`[access-control] denied owner-only route to ${user.email} (role: ${user.role})`);
+    redirect("/dashboard");
+  }
   return user;
 }
 
@@ -39,6 +45,9 @@ export async function requireNeighborhoodUser() {
  * at the top of every mutating Server Action to block writes from those
  * accounts while still letting them browse everything.
  */
-export function assertNotDemo(user: { isDemo: boolean }, redirectTo: string) {
-  if (user.isDemo) redirect(`${redirectTo}?error=demo-readonly`);
+export function assertNotDemo(user: { isDemo: boolean; email?: string | null }, redirectTo: string) {
+  if (user.isDemo) {
+    console.warn(`[demo-lockdown] blocked write from ${user.email ?? "demo account"} at ${redirectTo}`);
+    redirect(`${redirectTo}?error=demo-readonly`);
+  }
 }
