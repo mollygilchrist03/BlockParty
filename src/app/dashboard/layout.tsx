@@ -1,8 +1,16 @@
-import Image from "next/image";
-import Link from "next/link";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { neighborhoods, users } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { boardOnlyRoles, ownerOnlyRoles } from "@/lib/roles";
 import { DashboardNav } from "@/components/dashboard-nav";
+
+const roleLabels: Record<string, string> = {
+  owner: "Platform owner",
+  admin: "Admin",
+  board: "Board member",
+  resident: "Resident",
+};
 
 export default async function DashboardLayout({
   children,
@@ -13,24 +21,36 @@ export default async function DashboardLayout({
   const isBoard = boardOnlyRoles.includes(user.role);
   const isOwner = ownerOnlyRoles.includes(user.role);
 
+  const [me] = user.neighborhoodId
+    ? await db
+        .select({ unit: users.unit, neighborhoodName: neighborhoods.name })
+        .from(users)
+        .innerJoin(neighborhoods, eq(users.neighborhoodId, neighborhoods.id))
+        .where(eq(users.id, user.id))
+        .limit(1)
+    : [];
+
+  const userSubtitle = me?.unit || me?.neighborhoodName || roleLabels[user.role] || "";
+
   return (
-    <div className="flex flex-1 flex-col bg-background">
+    <div className="flex min-h-screen flex-1 flex-col bg-background xl:flex-row">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-navy focus:px-4 focus:py-2 focus:text-white"
       >
         Skip to main content
       </a>
-      <header className="sticky top-0 z-10 border-b border-slate-900/5 bg-white/80 shadow-sm shadow-slate-900/5 backdrop-blur">
-        <div className="relative flex items-center justify-between px-6 py-4 sm:px-10">
-          <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
-            <Image src="/logo.svg" alt="BlockParty logo" width={32} height={32} />
-            <span className="text-lg font-semibold text-navy">BlockParty</span>
-          </Link>
-          <DashboardNav isBoard={isBoard} isOwner={isOwner} />
-        </div>
-      </header>
-      <main id="main-content" className="flex flex-1 flex-col">{children}</main>
+      <DashboardNav
+        isBoard={isBoard}
+        isOwner={isOwner}
+        userName={user.name ?? "Neighbor"}
+        userSubtitle={userSubtitle}
+      />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <main id="main-content" className="flex flex-1 flex-col">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
