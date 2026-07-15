@@ -1,18 +1,16 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { compare, hash } from "bcryptjs";
-import { del, put } from "@vercel/blob";
+import { del } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { signOut } from "@/auth";
 import { assertNotDemo, requireUser } from "@/lib/session";
-import { detectImageType, safeFileName } from "@/lib/files";
+import { uploadValidatedImage } from "@/lib/files";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 import { SavedBanner } from "@/components/saved-banner";
 import { Avatar } from "@/components/avatar";
-
-const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 async function updateProfile(formData: FormData) {
   "use server";
@@ -30,26 +28,11 @@ async function updateProfile(formData: FormData) {
 
   let avatarUrl: string | undefined;
   if (avatarFile instanceof File && avatarFile.size > 0) {
-    if (avatarFile.size > MAX_AVATAR_BYTES) {
-      redirect("/dashboard/settings?error=avatar-too-large");
+    const result = await uploadValidatedImage(avatarFile, `avatars/${user.id}`);
+    if (result.error) {
+      redirect(`/dashboard/settings?error=avatar-${result.error}`);
     }
-
-    const header = new Uint8Array(await avatarFile.slice(0, 12).arrayBuffer());
-    const contentType = detectImageType(header);
-    if (!contentType) {
-      redirect("/dashboard/settings?error=avatar-invalid-type");
-    }
-
-    try {
-      const blob = await put(`avatars/${user.id}/${Date.now()}-${safeFileName(avatarFile.name, "avatar")}`, avatarFile, {
-        access: "public",
-        contentType,
-      });
-      avatarUrl = blob.url;
-    } catch (err) {
-      console.error("[settings] avatar upload failed", err);
-      redirect("/dashboard/settings?error=avatar-upload-failed");
-    }
+    avatarUrl = result.url;
   }
 
   const [previous] = await db
