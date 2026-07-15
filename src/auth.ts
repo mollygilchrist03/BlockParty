@@ -85,10 +85,10 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
               .insert(users)
               .values({ name: user.name ?? "Owner", email, role: "owner" })
               .returning();
-          } else if (dbUser.role !== "owner") {
+          } else if (dbUser.role !== "owner" || dbUser.neighborhoodId) {
             [dbUser] = await db
               .update(users)
-              .set({ role: "owner" })
+              .set({ role: "owner", neighborhoodId: null })
               .where(eq(users.id, dbUser.id))
               .returning();
           }
