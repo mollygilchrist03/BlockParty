@@ -77,6 +77,7 @@ async function seed() {
         passwordHash,
         role: "admin",
         unit: "HOA Office",
+        isDemo: true,
       },
       {
         neighborhoodId: neighborhood.id,
@@ -86,12 +87,14 @@ async function seed() {
         role: "resident",
         unit: "12B",
         directoryOptIn: true,
+        isDemo: true,
       },
       {
         name: "Olivia Owner",
         email: "owner@blockparty.test",
         passwordHash,
         role: "owner",
+        isDemo: true,
       },
       {
         neighborhoodId: neighborhood.id,
