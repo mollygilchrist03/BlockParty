@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
@@ -17,10 +18,16 @@ async function updateDirectoryOptIn(formData: FormData) {
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/directory");
+  redirect("/dashboard/settings?saved=1");
 }
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
   const user = await requireUser();
+  const { saved } = await searchParams;
 
   const [me] = await db
     .select({ directoryOptIn: users.directoryOptIn })
@@ -52,9 +59,27 @@ export default async function SettingsPage() {
             />
             List me in the community directory
           </label>
-          <button type="submit" className="btn-primary mt-4">
-            Save
-          </button>
+          <div className="mt-4 flex items-center gap-3">
+            <button type="submit" className="btn-primary">
+              Save
+            </button>
+            {saved === "1" && (
+              <span className="flex items-center gap-1.5 text-sm font-medium text-sage">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Saved
+              </span>
+            )}
+          </div>
         </form>
       </div>
     </div>
