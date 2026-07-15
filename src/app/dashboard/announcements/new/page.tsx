@@ -1,10 +1,16 @@
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { announcements } from "@/db/schema";
+import { announcementCategoryEnum, announcements } from "@/db/schema";
 import { assertNotDemo, requireBoard } from "@/lib/session";
 import { neighborhoodOptionsFor, postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 import { NeighborhoodSelect } from "@/components/neighborhood-select";
+
+const categoryLabels: Record<(typeof announcementCategoryEnum.enumValues)[number], string> = {
+  general: "General",
+  urgent: "Urgent",
+  maintenance: "Maintenance",
+};
 
 async function createAnnouncement(formData: FormData) {
   "use server";
@@ -13,15 +19,24 @@ async function createAnnouncement(formData: FormData) {
   assertNotDemo(user, "/dashboard/announcements/new");
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
+  const category = String(formData.get("category") ?? "general");
   const neighborhoodId = resolveActingNeighborhoodId(user, formData);
 
-  if (!title || !body || !neighborhoodId) return;
+  if (
+    !title ||
+    !body ||
+    !neighborhoodId ||
+    !announcementCategoryEnum.enumValues.includes(category as (typeof announcementCategoryEnum.enumValues)[number])
+  ) {
+    return;
+  }
 
   await db.insert(announcements).values({
     neighborhoodId,
     authorId: user.id,
     title,
     body,
+    category: category as (typeof announcementCategoryEnum.enumValues)[number],
   });
 
   redirect(postCreateRedirectPath(user, "/dashboard/announcements"));
@@ -48,6 +63,16 @@ export default async function NewAnnouncementPage({
         <label className="flex flex-col gap-1 text-sm text-slate">
           Title
           <input type="text" name="title" required className="field" />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-slate">
+          Category
+          <select name="category" defaultValue="general" className="field">
+            {announcementCategoryEnum.enumValues.map((value) => (
+              <option key={value} value={value}>
+                {categoryLabels[value]}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="flex flex-col gap-1 text-sm text-slate">
           Message
