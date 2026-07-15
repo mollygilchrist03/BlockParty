@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import { asc } from "drizzle-orm";
 import { db } from "@/db";
-import { amenities } from "@/db/schema";
+import { amenities, neighborhoods } from "@/db/schema";
 import { requireBoard } from "@/lib/session";
+import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
 
 async function createAmenity(formData: FormData) {
   "use server";
@@ -9,25 +11,41 @@ async function createAmenity(formData: FormData) {
   const user = await requireBoard();
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  const neighborhoodId = resolveActingNeighborhoodId(user, formData);
 
-  if (!name || !user.neighborhoodId) return;
+  if (!name || !neighborhoodId) return;
 
   await db.insert(amenities).values({
-    neighborhoodId: user.neighborhoodId,
+    neighborhoodId,
     name,
     description: description || null,
   });
 
-  redirect("/dashboard/amenities");
+  redirect(postCreateRedirectPath(user, "/dashboard/amenities"));
 }
 
 export default async function NewAmenityPage() {
-  await requireBoard();
+  const user = await requireBoard();
+  const neighborhoodOptions = user.neighborhoodId
+    ? []
+    : await db.select({ id: neighborhoods.id, name: neighborhoods.name }).from(neighborhoods).orderBy(asc(neighborhoods.name));
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">New amenity</h1>
       <form action={createAmenity} className="card flex flex-col gap-4">
+        {!user.neighborhoodId && (
+          <label className="flex flex-col gap-1 text-sm text-slate">
+            Neighborhood
+            <select name="neighborhoodId" required className="field">
+              {neighborhoodOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="flex flex-col gap-1 text-sm text-slate">
           Name
           <input

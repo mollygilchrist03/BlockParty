@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
+import { asc } from "drizzle-orm";
 import { db } from "@/db";
-import { newsletters } from "@/db/schema";
+import { neighborhoods, newsletters } from "@/db/schema";
 import { requireBoard } from "@/lib/session";
+import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -17,12 +19,13 @@ async function uploadNewsletter(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const month = Number(formData.get("month"));
   const year = Number(formData.get("year"));
+  const neighborhoodId = resolveActingNeighborhoodId(user, formData);
 
   if (
     !(file instanceof File) ||
     file.size === 0 ||
     !title ||
-    !user.neighborhoodId ||
+    !neighborhoodId ||
     !Number.isInteger(month) ||
     month < 1 ||
     month > 12 ||
@@ -31,30 +34,45 @@ async function uploadNewsletter(formData: FormData) {
     return;
   }
 
-  const blob = await put(`newsletters/${user.neighborhoodId}/${file.name}`, file, {
+  const blob = await put(`newsletters/${neighborhoodId}/${file.name}`, file, {
     access: "public",
     contentType: file.type || "application/pdf",
   });
 
   await db.insert(newsletters).values({
-    neighborhoodId: user.neighborhoodId,
+    neighborhoodId,
     title,
     fileUrl: blob.url,
     month,
     year,
   });
 
-  redirect("/dashboard/newsletters");
+  redirect(postCreateRedirectPath(user, "/dashboard/newsletters"));
 }
 
 export default async function NewNewsletterPage() {
-  await requireBoard();
+  const user = await requireBoard();
   const now = new Date();
+  const neighborhoodOptions = user.neighborhoodId
+    ? []
+    : await db.select({ id: neighborhoods.id, name: neighborhoods.name }).from(neighborhoods).orderBy(asc(neighborhoods.name));
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">Upload newsletter</h1>
       <form action={uploadNewsletter} className="card flex flex-col gap-4">
+        {!user.neighborhoodId && (
+          <label className="flex flex-col gap-1 text-sm text-slate">
+            Neighborhood
+            <select name="neighborhoodId" required className="field">
+              {neighborhoodOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="flex flex-col gap-1 text-sm text-slate">
           Title
           <input

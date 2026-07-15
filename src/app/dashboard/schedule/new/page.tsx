@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import { asc } from "drizzle-orm";
 import { db } from "@/db";
-import { scheduleFrequencyEnum, wasteSchedules, wasteTypeEnum } from "@/db/schema";
+import { neighborhoods, scheduleFrequencyEnum, wasteSchedules, wasteTypeEnum } from "@/db/schema";
 import { requireBoard } from "@/lib/session";
+import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
 
 const dayNames = [
   "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
@@ -16,9 +18,10 @@ async function createSchedule(formData: FormData) {
   const frequency = String(formData.get("frequency") ?? "weekly");
   const anchorDateRaw = String(formData.get("anchorDate") ?? "");
   const notes = String(formData.get("notes") ?? "").trim();
+  const neighborhoodId = resolveActingNeighborhoodId(user, formData);
 
   if (
-    !user.neighborhoodId ||
+    !neighborhoodId ||
     !wasteTypeEnum.enumValues.includes(type as (typeof wasteTypeEnum.enumValues)[number]) ||
     !scheduleFrequencyEnum.enumValues.includes(
       frequency as (typeof scheduleFrequencyEnum.enumValues)[number],
@@ -32,7 +35,7 @@ async function createSchedule(formData: FormData) {
   }
 
   await db.insert(wasteSchedules).values({
-    neighborhoodId: user.neighborhoodId,
+    neighborhoodId,
     type: type as (typeof wasteTypeEnum.enumValues)[number],
     dayOfWeek,
     frequency: frequency as (typeof scheduleFrequencyEnum.enumValues)[number],
@@ -40,17 +43,32 @@ async function createSchedule(formData: FormData) {
     notes: notes || null,
   });
 
-  redirect("/dashboard/schedule");
+  redirect(postCreateRedirectPath(user, "/dashboard/schedule"));
 }
 
 export default async function NewSchedulePage() {
-  await requireBoard();
+  const user = await requireBoard();
   const today = new Date().toISOString().slice(0, 10);
+  const neighborhoodOptions = user.neighborhoodId
+    ? []
+    : await db.select({ id: neighborhoods.id, name: neighborhoods.name }).from(neighborhoods).orderBy(asc(neighborhoods.name));
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">New pickup schedule</h1>
       <form action={createSchedule} className="card flex flex-col gap-4">
+        {!user.neighborhoodId && (
+          <label className="flex flex-col gap-1 text-sm text-slate">
+            Neighborhood
+            <select name="neighborhoodId" required className="field">
+              {neighborhoodOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="flex flex-col gap-1 text-sm text-slate">
           Type
           <select name="type" defaultValue="trash" className="field">
