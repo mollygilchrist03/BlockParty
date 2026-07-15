@@ -37,7 +37,7 @@ async function createAdmin(formData: FormData) {
     redirect("/dashboard/owner/admins/new?error=duplicate");
   }
 
-  redirect("/dashboard/owner");
+  redirect("/dashboard/owner?created=admin");
 }
 
 export default async function NewAdminPage({

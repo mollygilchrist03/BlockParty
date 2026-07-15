@@ -31,7 +31,7 @@ async function createNeighborhood(formData: FormData) {
     redirect("/dashboard/owner/neighborhoods/new?error=duplicate");
   }
 
-  redirect("/dashboard/owner");
+  redirect("/dashboard/owner?created=neighborhood");
 }
 
 export default async function NewNeighborhoodPage({
