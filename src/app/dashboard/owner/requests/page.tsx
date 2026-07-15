@@ -4,6 +4,7 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoodRequests } from "@/db/schema";
 import { assertNotDemo, requireOwner } from "@/lib/session";
+import { sendDenialEmail } from "@/lib/email";
 import { SavedBanner } from "@/components/saved-banner";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
@@ -13,10 +14,25 @@ async function denyRequest(requestId: string) {
   const user = await requireOwner();
   assertNotDemo(user, "/dashboard/owner/requests");
 
+  const [request] = await db
+    .select()
+    .from(neighborhoodRequests)
+    .where(eq(neighborhoodRequests.id, requestId))
+    .limit(1);
+  if (!request || request.status !== "pending") {
+    redirect("/dashboard/owner/requests");
+  }
+
   await db
     .update(neighborhoodRequests)
     .set({ status: "denied" })
     .where(eq(neighborhoodRequests.id, requestId));
+
+  await sendDenialEmail({
+    to: request.requesterEmail,
+    name: request.requesterName,
+    neighborhoodName: request.neighborhoodName,
+  });
 
   redirect("/dashboard/owner/requests?denied=1");
 }

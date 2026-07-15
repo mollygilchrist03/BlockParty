@@ -1,11 +1,17 @@
 import { notFound, redirect } from "next/navigation";
+import { randomBytes } from "crypto";
 import { hash } from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoodRequests, neighborhoods, users } from "@/db/schema";
 import { assertNotDemo, requireOwner } from "@/lib/session";
 import { slugify } from "@/lib/slug";
+import { sendApprovalEmail } from "@/lib/email";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
+
+function generateTempPassword(): string {
+  return randomBytes(9).toString("base64url");
+}
 
 async function approveRequest(requestId: string, formData: FormData) {
   "use server";
@@ -24,12 +30,12 @@ async function approveRequest(requestId: string, formData: FormData) {
   const address = String(formData.get("address") ?? "").trim();
   const adminName = String(formData.get("adminName") ?? "").trim();
   const adminEmail = String(formData.get("adminEmail") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
 
-  if (!neighborhoodName || !adminName || !adminEmail || password.length < 8) {
+  if (!neighborhoodName || !adminName || !adminEmail) {
     redirect(`/dashboard/owner/requests/${requestId}?error=invalid`);
   }
 
+  const password = generateTempPassword();
   const passwordHash = await hash(password, 10);
 
   let neighborhoodId: string;
@@ -62,6 +68,13 @@ async function approveRequest(requestId: string, formData: FormData) {
     .update(neighborhoodRequests)
     .set({ status: "approved" })
     .where(eq(neighborhoodRequests.id, requestId));
+
+  await sendApprovalEmail({
+    to: adminEmail,
+    name: adminName,
+    neighborhoodName,
+    password,
+  });
 
   redirect("/dashboard/owner?created=admin");
 }
@@ -104,7 +117,7 @@ export default async function RequestDetailPage({
         <DemoReadonlyBanner error={error} />
         {error === "invalid" && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-            Fill in every field — password needs at least 8 characters.
+            Fill in every field.
           </p>
         )}
         {error === "duplicate-neighborhood" && (
@@ -156,21 +169,10 @@ export default async function RequestDetailPage({
             className="field"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-slate">
-          Temporary password
-          <input
-            type="text"
-            name="password"
-            required
-            minLength={8}
-            placeholder="At least 8 characters"
-            className="field"
-          />
-          <span className="text-xs text-muted">
-            Send this to {request.requesterName} yourself — there&apos;s no
-            automated invite email yet.
-          </span>
-        </label>
+        <p className="text-xs text-muted">
+          A temporary password will be generated and emailed to{" "}
+          {request.requesterName} along with a sign-in link.
+        </p>
         <button type="submit" className="btn-primary self-start">
           Create neighborhood &amp; admin account
         </button>

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { and, count, eq, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoodRequests } from "@/db/schema";
+import { notifyOwnerOfNewRequest } from "@/lib/email";
 import { SavedBanner } from "@/components/saved-banner";
 
 const REQUEST_RATE_LIMIT = 3;
@@ -72,6 +73,14 @@ async function requestNeighborhood(formData: FormData) {
     console.error("[neighborhood-request] insert failed", err);
     redirect("/?requestError=failed#request");
   }
+
+  await notifyOwnerOfNewRequest({
+    neighborhoodName,
+    address: address || null,
+    requesterName,
+    requesterEmail,
+    message: message || null,
+  });
 
   redirect("/?requested=1#request");
 }

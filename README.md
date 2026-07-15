@@ -77,6 +77,23 @@ A few things here were built the harder-but-more-realistic way on purpose:
   neighborhood once it's actually empty, since the FK cascade otherwise
   takes every resident, admin, and their posts/events with it. This is the
   same shape as how most real multi-tenant SaaS onboards new customers/orgs.
+- **Self-service tenant onboarding, with real email.** Anyone can request
+  a neighborhood from the public homepage — no account needed. That's an
+  unauthenticated write endpoint, so it's hardened accordingly: a honeypot
+  field, per-email rate limiting, and server-side length validation. A
+  Resend email notifies the owner the moment a request comes in
+  (`replyTo` set to the requester, so replying works immediately); the
+  owner reviews it from `/dashboard/owner/requests`, and approving
+  auto-generates a password and emails the new admin their login link
+  directly, while denying sends a polite decline. (Caught a real bug
+  wiring this up: the Resend SDK returns `{ error }` for API-level
+  rejections — sandbox mode blocking a send to anyone but the account's
+  own email, in this case — rather than throwing, so a bare try/catch
+  was silently swallowing failures. Also worth knowing if you fork this:
+  without a verified domain, Resend's test mode only delivers to the
+  account's own address — the owner-notification email is unaffected
+  since that's always who it's sent to, but approve/deny emails to real
+  requesters need a verified domain to reach anyone else.)
 
 ## Tech stack
 
@@ -168,21 +185,29 @@ Schema lives in `src/db/schema.ts`. Useful scripts:
 ## Deployment
 
 - **App** → Vercel. Set `DATABASE_URL`, `AUTH_SECRET`,
-  `BLOB_READ_WRITE_TOKEN`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, and
-  `OWNER_EMAIL` as environment variables in the Vercel project settings.
+  `BLOB_READ_WRITE_TOKEN`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`,
+  `OWNER_EMAIL`, and `RESEND_API_KEY` as environment variables in the
+  Vercel project settings.
 - **Database** → Neon. Use a pooled connection string for serverless
   functions.
 - **File storage** → create a Blob store under the Vercel project's
   Storage tab; it provisions `BLOB_READ_WRITE_TOKEN` automatically. Run
   `vercel env pull` to get it locally.
+- **Email** → [Resend](https://resend.com) (free tier): notifies the
+  owner of new neighborhood requests, and emails a requester directly
+  when the owner approves (login link + temp password) or denies theirs.
+  Degrades gracefully if unset — the app logs a warning and moves on
+  rather than failing the underlying action. Without a verified domain
+  (resend.com/domains), Resend's test mode only delivers to the account's
+  own email — see the note under Notable engineering decisions.
 
 ## What's next
 
 Things I'd tackle if this kept growing past a portfolio piece:
 
-- Email delivery for new HOA admin accounts (owner currently sets a
-  temporary password directly; there's no "forgot password" or invite
-  email flow yet)
+- A "forgot password" flow for board/admin accounts (owner can still
+  reset one manually from `/dashboard/owner/admins/[id]`, but there's no
+  self-service reset yet)
 - Automated tests — currently leans on `tsc`, `next build`, and
   scripted/manual browser verification for each change
 - Full dark mode support (currently forced to light; see the comment in
