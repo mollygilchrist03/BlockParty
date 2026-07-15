@@ -59,7 +59,7 @@ export default async function NewSchedulePage() {
             <option value="bulk">Bulk pickup</option>
           </select>
         </label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm text-slate">
             Day of week
             <select name="dayOfWeek" defaultValue="1" className="field">

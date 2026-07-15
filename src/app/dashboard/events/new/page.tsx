@@ -50,7 +50,7 @@ export default async function NewEventPage() {
           Location
           <input type="text" name="location" className="field" />
         </label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm text-slate">
             Starts at
             <input type="datetime-local" name="startsAt" required className="field" />
