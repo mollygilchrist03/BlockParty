@@ -15,6 +15,12 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex flex-1 flex-col bg-background">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-navy focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to main content
+      </a>
       <header className="sticky top-0 z-10 border-b border-slate-900/5 bg-white/80 shadow-sm shadow-slate-900/5 backdrop-blur">
         <div className="relative flex items-center justify-between px-6 py-4 sm:px-10">
           <Link href="/dashboard" className="flex shrink-0 items-center gap-2">
@@ -24,7 +30,7 @@ export default async function DashboardLayout({
           <DashboardNav isBoard={isBoard} isOwner={isOwner} />
         </div>
       </header>
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main id="main-content" className="flex flex-1 flex-col">{children}</main>
     </div>
   );
 }
