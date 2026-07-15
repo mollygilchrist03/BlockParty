@@ -3,15 +3,8 @@ import { and, count, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, users } from "@/db/schema";
 import { assertNotDemo, requireOwner } from "@/lib/session";
+import { slugify } from "@/lib/slug";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
-
-function slugify(name: string) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 async function updateNeighborhood(id: string, formData: FormData) {
   "use server";

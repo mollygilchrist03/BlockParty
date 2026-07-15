@@ -2,15 +2,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { neighborhoods } from "@/db/schema";
 import { assertNotDemo, requireOwner } from "@/lib/session";
+import { slugify } from "@/lib/slug";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
-
-function slugify(name: string) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 async function createNeighborhood(formData: FormData) {
   "use server";
