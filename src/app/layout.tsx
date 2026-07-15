@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BlockParty — Your neighborhood's digital gathering place",
+  title: "BlockParty",
   description:
     "Community events, announcements, amenity reservations, and more for your HOA or neighborhood.",
   icons: { icon: "/logo.svg" },
