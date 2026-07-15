@@ -34,7 +34,7 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-background px-6 py-16">
+    <main className="flex flex-1 items-center justify-center bg-background px-6 py-16">
       <div className="flex w-full max-w-sm flex-col items-center gap-6">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.svg" alt="" width={36} height={36} />
@@ -98,6 +98,6 @@ export default async function LoginPage({
           </form>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
