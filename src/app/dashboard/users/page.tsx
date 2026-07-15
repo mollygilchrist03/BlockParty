@@ -3,6 +3,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, users } from "@/db/schema";
 import { requireBoard } from "@/lib/session";
+import { SavedBanner } from "@/components/saved-banner";
 
 export default async function UsersPage({
   searchParams,
@@ -32,26 +33,11 @@ export default async function UsersPage({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">Residents</h1>
-      {updated === "1" && (
-        <p className="flex items-center gap-1.5 rounded-lg bg-sage-light px-3 py-2 text-sm font-medium text-sage">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4 shrink-0"
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-          Resident saved.
-        </p>
-      )}
+      <SavedBanner message={updated === "1" ? "Resident saved." : null} />
       {rows.length === 0 ? (
         <p className="text-slate">No residents yet.</p>
       ) : (
-        <ul className="divide-y divide-slate/10 overflow-hidden rounded-2xl border border-slate-900/8 bg-white shadow-sm shadow-slate-900/5">
+        <ul className="list-card">
           {rows.map((resident) => (
             <li key={resident.id}>
               <Link

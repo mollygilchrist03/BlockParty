@@ -3,6 +3,7 @@ import { asc, count, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, users } from "@/db/schema";
 import { requireOwner } from "@/lib/session";
+import { SavedBanner } from "@/components/saved-banner";
 
 const roleLabels: Record<string, string> = {
   admin: "Admin",
@@ -100,22 +101,7 @@ export default async function OwnerPage({
         </h1>
       </div>
 
-      {banner && (
-        <p className="flex items-center gap-1.5 rounded-lg bg-sage-light px-3 py-2 text-sm font-medium text-sage">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4 shrink-0"
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-          {banner}
-        </p>
-      )}
+      <SavedBanner message={banner} />
 
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
@@ -156,7 +142,7 @@ export default async function OwnerPage({
         {staff.length === 0 ? (
           <p className="text-slate">No board/admin accounts yet.</p>
         ) : (
-          <ul className="divide-y divide-slate/10 overflow-hidden rounded-2xl border border-slate-900/8 bg-white shadow-sm shadow-slate-900/5">
+          <ul className="list-card">
             {staff.map((person) => (
               <li key={person.id}>
                 <Link
@@ -186,7 +172,7 @@ export default async function OwnerPage({
         {residents.length === 0 ? (
           <p className="text-slate">No residents yet.</p>
         ) : (
-          <ul className="divide-y divide-slate/10 overflow-hidden rounded-2xl border border-slate-900/8 bg-white shadow-sm shadow-slate-900/5">
+          <ul className="list-card">
             {residents.map((person) => (
               <li key={person.id}>
                 <Link

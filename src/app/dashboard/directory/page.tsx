@@ -38,7 +38,7 @@ export default async function DirectoryPage() {
       {rows.length === 0 ? (
         <p className="text-slate">No one has opted into the directory yet.</p>
       ) : (
-        <ul className="divide-y divide-slate/10 overflow-hidden rounded-2xl border border-slate-900/8 bg-white shadow-sm shadow-slate-900/5">
+        <ul className="list-card">
           {rows.map((resident) => (
             <li
               key={resident.id}
