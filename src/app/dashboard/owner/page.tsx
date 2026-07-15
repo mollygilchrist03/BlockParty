@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { asc, count, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { neighborhoods, users } from "@/db/schema";
+import { neighborhoodRequests, neighborhoods, users } from "@/db/schema";
 import { requireOwner } from "@/lib/session";
 import { SavedBanner } from "@/components/saved-banner";
 
@@ -32,6 +32,11 @@ export default async function OwnerPage({
 }) {
   await requireOwner();
   const { created, updated, deleted } = await searchParams;
+
+  const [{ pendingRequestCount }] = await db
+    .select({ pendingRequestCount: count() })
+    .from(neighborhoodRequests)
+    .where(eq(neighborhoodRequests.status, "pending"));
 
   const neighborhoodRows = await db
     .select()
@@ -102,6 +107,18 @@ export default async function OwnerPage({
       </div>
 
       <SavedBanner message={banner} />
+
+      {pendingRequestCount > 0 && (
+        <Link
+          href="/dashboard/owner/requests"
+          className="card card-link flex items-center justify-between"
+        >
+          <span className="font-medium text-navy">
+            {pendingRequestCount} neighborhood{pendingRequestCount === 1 ? "" : "s"} requested
+          </span>
+          <span className="text-sm font-medium text-sage">Review →</span>
+        </Link>
+      )}
 
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
