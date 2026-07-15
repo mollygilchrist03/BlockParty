@@ -231,7 +231,7 @@ export function DashboardNav({
     <>
       <aside className="hidden xl:flex xl:w-64 xl:shrink-0 xl:flex-col xl:bg-navy">
         <Link href="/dashboard" className="flex items-center gap-2 px-6 py-5">
-          <Image src="/logo.svg" alt="BlockParty logo" width={28} height={28} />
+          <Image src="/BlockParty.svg" alt="BlockParty logo" width={28} height={28} />
           <span className="text-lg font-semibold text-white">BlockParty</span>
         </Link>
         {navBody(() => {})}
