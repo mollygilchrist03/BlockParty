@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { signOutAction } from "@/lib/auth-actions";
 
 const links = [
   { href: "/dashboard/announcements", label: "Announcements" },
@@ -60,7 +59,7 @@ export function DashboardNav({
         >
           Settings
         </Link>
-        <form action={signOutAction}>
+        <form action="/api/logout" method="post">
           <button
             type="submit"
             className="text-sm font-medium text-slate transition-colors hover:text-navy"
@@ -141,7 +140,7 @@ export function DashboardNav({
             >
               Settings
             </Link>
-            <form action={signOutAction}>
+            <form action="/api/logout" method="post">
               <button
                 type="submit"
                 className="w-full rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-slate/10"
