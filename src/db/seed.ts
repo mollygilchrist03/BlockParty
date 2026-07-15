@@ -32,7 +32,7 @@ async function seed() {
 
   const passwordHash = await hash("password123", 10);
 
-  const [admin, resident] = await db
+  const [admin, resident, owner] = await db
     .insert(users)
     .values([
       {
@@ -51,6 +51,12 @@ async function seed() {
         role: "resident",
         unit: "12B",
         directoryOptIn: true,
+      },
+      {
+        name: "Olivia Owner",
+        email: "owner@blockparty.test",
+        passwordHash,
+        role: "owner",
       },
     ])
     .returning();
@@ -142,10 +148,11 @@ async function seed() {
   ]);
 
   console.log(
-    `Seeded neighborhood "${neighborhood.name}" with 2 users, 2 announcements, 2 events, 2 bulletin posts, 2 amenities (${pool.name} + Clubhouse), and 2 pickup schedules.`,
+    `Seeded neighborhood "${neighborhood.name}" with 3 users, 2 announcements, 2 events, 2 bulletin posts, 2 amenities (${pool.name} + Clubhouse), and 2 pickup schedules.`,
   );
   console.log(`Admin login: ${admin.email} / password123`);
   console.log(`Resident login: ${resident.email} / password123`);
+  console.log(`Owner login: ${owner.email} / password123`);
 }
 
 seed().then(() => process.exit(0));
