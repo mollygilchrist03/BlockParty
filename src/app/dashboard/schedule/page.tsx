@@ -23,6 +23,13 @@ async function deleteSchedule(scheduleId: string) {
 
   const user = await requireUser();
   if (!boardOnlyRoles.includes(user.role)) return;
+
+  const [schedule] = await db
+    .select({ neighborhoodId: wasteSchedules.neighborhoodId })
+    .from(wasteSchedules)
+    .where(eq(wasteSchedules.id, scheduleId))
+    .limit(1);
+  if (!schedule || schedule.neighborhoodId !== user.neighborhoodId) return;
   assertNotDemo(user, "/dashboard/schedule");
 
   await db.delete(wasteSchedules).where(eq(wasteSchedules.id, scheduleId));

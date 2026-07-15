@@ -25,6 +25,8 @@ async function deletePost(postId: string) {
   const [post] = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
   if (!post) return;
 
+  if (post.neighborhoodId !== user.neighborhoodId) return;
+
   const canDelete = post.authorId === user.id || boardOnlyRoles.includes(user.role);
   if (!canDelete) return;
   assertNotDemo(user, "/dashboard/board");

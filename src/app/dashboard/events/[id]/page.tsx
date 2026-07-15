@@ -12,6 +12,13 @@ async function toggleRsvp(eventId: string) {
   const user = await requireUser();
   assertNotDemo(user, `/dashboard/events/${eventId}`);
 
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(eq(events.id, eventId))
+    .limit(1);
+  if (!event || event.neighborhoodId !== user.neighborhoodId) return;
+
   const [existing] = await db
     .select()
     .from(eventRegistrations)
@@ -48,13 +55,6 @@ async function toggleRsvp(eventId: string) {
         .where(eq(eventRegistrations.id, nextInLine.id));
     }
   } else {
-    const [event] = await db
-      .select()
-      .from(events)
-      .where(eq(events.id, eventId))
-      .limit(1);
-    if (!event) return;
-
     const [{ registeredCount }] = await db
       .select({ registeredCount: count() })
       .from(eventRegistrations)

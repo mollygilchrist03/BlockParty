@@ -11,6 +11,14 @@ async function reserveAmenity(amenityId: string, formData: FormData) {
 
   const user = await requireUser();
   assertNotDemo(user, `/dashboard/amenities/${amenityId}`);
+
+  const [amenity] = await db
+    .select({ neighborhoodId: amenities.neighborhoodId })
+    .from(amenities)
+    .where(eq(amenities.id, amenityId))
+    .limit(1);
+  if (!amenity || amenity.neighborhoodId !== user.neighborhoodId) return;
+
   const startsAtRaw = String(formData.get("startsAt") ?? "");
   const endsAtRaw = String(formData.get("endsAt") ?? "");
   if (!startsAtRaw || !endsAtRaw) return;
