@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { asc } from "drizzle-orm";
 import { db } from "@/db";
-import { events, neighborhoods } from "@/db/schema";
+import { events } from "@/db/schema";
 import { assertNotDemo, requireBoard } from "@/lib/session";
-import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
+import { neighborhoodOptionsFor, postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
+import { NeighborhoodSelect } from "@/components/neighborhood-select";
 
 async function createEvent(formData: FormData) {
   "use server";
@@ -40,9 +40,7 @@ export default async function NewEventPage({
 }) {
   const user = await requireBoard();
   const { error } = await searchParams;
-  const neighborhoodOptions = user.neighborhoodId
-    ? []
-    : await db.select({ id: neighborhoods.id, name: neighborhoods.name }).from(neighborhoods).orderBy(asc(neighborhoods.name));
+  const neighborhoodOptions = await neighborhoodOptionsFor(user);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
@@ -52,18 +50,7 @@ export default async function NewEventPage({
       </div>
       <DemoReadonlyBanner error={error} />
       <form action={createEvent} className="card flex flex-col gap-4">
-        {!user.neighborhoodId && (
-          <label className="flex flex-col gap-1 text-sm text-slate">
-            Neighborhood
-            <select name="neighborhoodId" required className="field">
-              {neighborhoodOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        <NeighborhoodSelect neighborhoodId={user.neighborhoodId} options={neighborhoodOptions} />
         <label className="flex flex-col gap-1 text-sm text-slate">
           Title
           <input type="text" name="title" required className="field" />

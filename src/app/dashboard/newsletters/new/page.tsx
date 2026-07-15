@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
-import { asc } from "drizzle-orm";
 import { db } from "@/db";
-import { neighborhoods, newsletters } from "@/db/schema";
+import { newsletters } from "@/db/schema";
 import { assertNotDemo, requireBoard } from "@/lib/session";
-import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
+import { neighborhoodOptionsFor, postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
+import { NeighborhoodSelect } from "@/components/neighborhood-select";
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -82,9 +82,7 @@ export default async function NewNewsletterPage({
   const user = await requireBoard();
   const { error } = await searchParams;
   const now = new Date();
-  const neighborhoodOptions = user.neighborhoodId
-    ? []
-    : await db.select({ id: neighborhoods.id, name: neighborhoods.name }).from(neighborhoods).orderBy(asc(neighborhoods.name));
+  const neighborhoodOptions = await neighborhoodOptionsFor(user);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
@@ -96,18 +94,7 @@ export default async function NewNewsletterPage({
         </p>
       )}
       <form action={uploadNewsletter} className="card flex flex-col gap-4">
-        {!user.neighborhoodId && (
-          <label className="flex flex-col gap-1 text-sm text-slate">
-            Neighborhood
-            <select name="neighborhoodId" required className="field">
-              {neighborhoodOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        <NeighborhoodSelect neighborhoodId={user.neighborhoodId} options={neighborhoodOptions} />
         <label className="flex flex-col gap-1 text-sm text-slate">
           Title
           <input

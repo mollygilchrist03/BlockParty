@@ -1,5 +1,22 @@
+import { asc } from "drizzle-orm";
+import { db } from "@/db";
+import { neighborhoods } from "@/db/schema";
+
 export const boardOnlyRoles = ["board", "admin", "owner"];
 export const ownerOnlyRoles = ["owner"];
+
+/**
+ * Options for the neighborhood picker shown on board-only create forms
+ * when the acting user is owner (no neighborhood of their own). Empty for
+ * board/admin, who never see the picker.
+ */
+export async function neighborhoodOptionsFor(user: { neighborhoodId: string | null }) {
+  if (user.neighborhoodId) return [];
+  return db
+    .select({ id: neighborhoods.id, name: neighborhoods.name })
+    .from(neighborhoods)
+    .orderBy(asc(neighborhoods.name));
+}
 
 /**
  * Board/admin act on their own neighborhood implicitly. Owner isn't tied

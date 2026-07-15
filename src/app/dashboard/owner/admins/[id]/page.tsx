@@ -1,9 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { hash } from "bcryptjs";
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { neighborhoods, users } from "@/db/schema";
+import { users } from "@/db/schema";
 import { assertNotDemo, requireOwner } from "@/lib/session";
+import { neighborhoodOptionsFor } from "@/lib/roles";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function updateAdmin(id: string, formData: FormData) {
@@ -62,7 +63,7 @@ export default async function AdminDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
-  await requireOwner();
+  const user = await requireOwner();
   const { id } = await params;
   const { error } = await searchParams;
 
@@ -75,10 +76,7 @@ export default async function AdminDetailPage({
     notFound();
   }
 
-  const neighborhoodOptions = await db
-    .select({ id: neighborhoods.id, name: neighborhoods.name })
-    .from(neighborhoods)
-    .orderBy(asc(neighborhoods.name));
+  const neighborhoodOptions = await neighborhoodOptionsFor(user);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">

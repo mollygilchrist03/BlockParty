@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { wasteSchedules } from "@/db/schema";
 import { assertNotDemo, requireNeighborhoodUser, requireUser } from "@/lib/session";
-import { nextPickupDate } from "@/lib/waste";
+import { dayNames, nextPickupDate } from "@/lib/waste";
 import { boardOnlyRoles } from "@/lib/roles";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
@@ -13,10 +13,6 @@ const typeLabels: Record<string, string> = {
   recycling: "Recycling",
   bulk: "Bulk pickup",
 };
-
-const dayNames = [
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-];
 
 async function deleteSchedule(scheduleId: string) {
   "use server";

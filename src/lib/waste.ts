@@ -1,5 +1,9 @@
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+export const dayNames = [
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+];
+
 export function nextPickupDate(
   dayOfWeek: number,
   frequency: "weekly" | "biweekly",
