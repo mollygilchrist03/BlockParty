@@ -15,6 +15,8 @@ recurring schedules.
 | Resident | `resident@maplegrove.test` | `password123` |
 
 Residents can also sign in with Google — see [Sign-in model](#sign-in-model).
+(The platform-owner tier is tied to the deployer's own Google account and
+isn't demoable by visitors — see below.)
 
 ![Landing page](docs/screenshots/landing.png)
 
@@ -24,7 +26,10 @@ Events with capacity-aware RSVPs, neighborhood announcements, a bulletin
 board (yard sales, lost & found, recommendations), amenity reservations,
 a newsletter archive, an opt-in resident directory, and trash/recycling
 pickup schedules — all scoped to a neighborhood and gated by role
-(`resident` / `board` / `admin`, plus a platform-level `owner`).
+(`resident` / `board` / `admin`). Above that, a platform-level `owner`
+provisions new neighborhoods and HOA admin accounts from its own
+dashboard — the same shape as how most multi-tenant SaaS onboards new
+customers.
 
 ![Dashboard](docs/screenshots/dashboard.png)
 
