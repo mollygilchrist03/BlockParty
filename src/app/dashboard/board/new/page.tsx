@@ -2,14 +2,21 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { postCategoryEnum, posts } from "@/db/schema";
 import { assertNotDemo, requireUser } from "@/lib/session";
+import { postCategoryLabels } from "@/lib/posts";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
-const categories = [
-  { value: "general", label: "General" },
-  { value: "yard_sale", label: "Yard sale" },
-  { value: "lost_and_found", label: "Lost & found" },
-  { value: "recommendation", label: "Recommendation" },
-] as const;
+// "General" first, as the sensible default for a new post — everywhere
+// else (the board's filter chips) follows the schema's declared order.
+const categoryOrder: (typeof postCategoryEnum.enumValues)[number][] = [
+  "general",
+  "yard_sale",
+  "lost_and_found",
+  "recommendation",
+];
+const categories = categoryOrder.map((value) => ({
+  value,
+  label: postCategoryLabels[value],
+}));
 
 async function createPost(formData: FormData) {
   "use server";

@@ -2,21 +2,16 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { posts } from "@/db/schema";
+import { postCategoryEnum, posts } from "@/db/schema";
 import { assertNotDemo, requireNeighborhoodUser, requireUser } from "@/lib/session";
 import { boardOnlyRoles } from "@/lib/roles";
+import { postCategoryLabels } from "@/lib/posts";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
-const categories = [
-  { value: "yard_sale", label: "Yard sale" },
-  { value: "lost_and_found", label: "Lost & found" },
-  { value: "recommendation", label: "Recommendation" },
-  { value: "general", label: "General" },
-] as const;
-
-const categoryLabels = Object.fromEntries(
-  categories.map((c) => [c.value, c.label]),
-);
+const categories = postCategoryEnum.enumValues.map((value) => ({
+  value,
+  label: postCategoryLabels[value],
+}));
 
 async function deletePost(postId: string) {
   "use server";
@@ -111,7 +106,7 @@ export default async function BulletinBoardPage({
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <span className="inline-block rounded-full bg-sage-light px-2 py-0.5 text-xs font-medium text-sage">
-                      {categoryLabels[post.category]}
+                      {postCategoryLabels[post.category]}
                     </span>
                     <h2 className="mt-2 font-semibold text-navy">{post.title}</h2>
                   </div>
