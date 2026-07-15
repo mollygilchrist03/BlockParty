@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { and, asc, count, eq } from "drizzle-orm";
@@ -115,6 +116,15 @@ export default async function EventDetailPage({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
+      {event.imageUrl && (
+        <Image
+          src={event.imageUrl}
+          alt=""
+          width={640}
+          height={320}
+          className="h-48 w-full rounded-2xl object-cover sm:h-64"
+        />
+      )}
       <div>
         <h1 className="text-2xl font-semibold text-navy">{event.title}</h1>
         <p className="mt-1 text-slate">
