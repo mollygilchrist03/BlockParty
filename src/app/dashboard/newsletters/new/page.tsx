@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { newsletters } from "@/db/schema";
 import { assertNotDemo, requireBoard } from "@/lib/session";
 import { neighborhoodOptionsFor, postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
+import { safeFileName } from "@/lib/files";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 import { NeighborhoodSelect } from "@/components/neighborhood-select";
 
@@ -13,11 +14,6 @@ const monthNames = [
 ];
 
 const MAX_NEWSLETTER_BYTES = 15 * 1024 * 1024;
-
-function safeFileName(name: string) {
-  const base = name.split(/[/\\]/).pop() ?? "newsletter";
-  return base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100) || "newsletter.pdf";
-}
 
 async function uploadNewsletter(formData: FormData) {
   "use server";
@@ -54,7 +50,7 @@ async function uploadNewsletter(formData: FormData) {
 
   let blob;
   try {
-    blob = await put(`newsletters/${neighborhoodId}/${safeFileName(file.name)}`, file, {
+    blob = await put(`newsletters/${neighborhoodId}/${safeFileName(file.name, "newsletter.pdf")}`, file, {
       access: "public",
       contentType: "application/pdf",
     });
