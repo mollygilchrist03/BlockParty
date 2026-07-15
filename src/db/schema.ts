@@ -52,6 +52,8 @@ export const users = pgTable("users", {
   unit: varchar("unit", { length: 100 }),
   directoryOptIn: boolean("directory_opt_in").notNull().default(false),
   isDemo: boolean("is_demo").notNull().default(false),
+  failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
+  lockedUntil: timestamp("locked_until"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

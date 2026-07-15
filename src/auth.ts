@@ -6,6 +6,9 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000;
+
 export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
@@ -28,8 +31,46 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 
         if (!user || !user.passwordHash) return null;
 
-        const passwordMatches = await compare(password, user.passwordHash);
-        if (!passwordMatches) return null;
+        // The seeded demo accounts have a publicly published password, so
+        // brute-force lockout doesn't protect anything for them — it would
+        // just let a visitor lock a real employer out of trying the demo.
+        // They're already write-blocked elsewhere, which is the actual risk.
+        if (!user.isDemo) {
+          // Same generic failure path whether the account is locked or the
+          // password is just wrong, so a caller can't use the difference to
+          // enumerate which emails have accounts.
+          if (user.lockedUntil && user.lockedUntil > new Date()) {
+            console.warn(`[auth] login rejected, account locked: ${user.email}`);
+            return null;
+          }
+
+          const passwordMatches = await compare(password, user.passwordHash);
+          if (!passwordMatches) {
+            const attempts = user.failedLoginAttempts + 1;
+            const locked = attempts >= MAX_LOGIN_ATTEMPTS;
+            await db
+              .update(users)
+              .set({
+                failedLoginAttempts: attempts,
+                lockedUntil: locked ? new Date(Date.now() + LOCKOUT_MS) : null,
+              })
+              .where(eq(users.id, user.id));
+            console.warn(
+              `[auth] failed login for ${user.email} (attempt ${attempts}${locked ? ", now locked" : ""})`,
+            );
+            return null;
+          }
+
+          if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+            await db
+              .update(users)
+              .set({ failedLoginAttempts: 0, lockedUntil: null })
+              .where(eq(users.id, user.id));
+          }
+        } else {
+          const passwordMatches = await compare(password, user.passwordHash);
+          if (!passwordMatches) return null;
+        }
 
         return {
           id: user.id,
