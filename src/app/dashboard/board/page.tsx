@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { and, desc, eq } from "drizzle-orm";
@@ -6,12 +7,27 @@ import { postCategoryEnum, posts } from "@/db/schema";
 import { assertNotDemo, requireNeighborhoodUser, requireUser } from "@/lib/session";
 import { boardOnlyRoles } from "@/lib/roles";
 import { postCategoryLabels } from "@/lib/posts";
+import { timeAgo } from "@/lib/time-ago";
 import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 const categories = postCategoryEnum.enumValues.map((value) => ({
   value,
   label: postCategoryLabels[value],
 }));
+
+const categoryBadge: Record<(typeof postCategoryEnum.enumValues)[number], string> = {
+  yard_sale: "bg-amber-50 text-amber-700",
+  lost_and_found: "bg-blue-50 text-blue-700",
+  recommendation: "bg-violet-50 text-violet-700",
+  general: "bg-slate-100 text-slate",
+};
+
+const postIcon = (
+  <>
+    <path d="M20.59 13.41 11 3.83 3.83 11l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83Z" />
+    <circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none" />
+  </>
+);
 
 async function deletePost(postId: string) {
   "use server";
@@ -46,6 +62,7 @@ export default async function BulletinBoardPage({
       title: posts.title,
       body: posts.body,
       category: posts.category,
+      imageUrl: posts.imageUrl,
       createdAt: posts.createdAt,
       authorId: posts.authorId,
     })
@@ -58,11 +75,11 @@ export default async function BulletinBoardPage({
     .orderBy(desc(posts.createdAt));
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-12 sm:px-10">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-12 sm:px-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-navy">Bulletin board</h1>
+        <h1 className="text-2xl font-semibold text-navy">Bulletin Board</h1>
         <Link href="/dashboard/board/new" className="btn-primary">
-          New post
+          + New Post
         </Link>
       </div>
 
@@ -77,7 +94,7 @@ export default async function BulletinBoardPage({
               : "border border-slate/20 bg-white text-slate hover:border-sage hover:text-sage"
           }`}
         >
-          All
+          All Posts
         </Link>
         {categories.map((c) => (
           <Link
@@ -97,34 +114,39 @@ export default async function BulletinBoardPage({
       {rows.length === 0 ? (
         <p className="text-slate">No posts yet.</p>
       ) : (
-        <ul className="flex flex-col gap-4">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((post) => {
-            const canDelete =
-              post.authorId === user.id || boardOnlyRoles.includes(user.role);
+            const canDelete = post.authorId === user.id || boardOnlyRoles.includes(user.role);
             return (
-              <li key={post.id} className="card">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <span className="inline-block rounded-full bg-sage-light px-2 py-0.5 text-xs font-medium text-sage">
-                      {postCategoryLabels[post.category]}
-                    </span>
-                    <h2 className="mt-2 font-semibold text-navy">{post.title}</h2>
-                  </div>
-                  <time className="shrink-0 text-xs text-muted">
-                    {post.createdAt.toLocaleDateString()}
-                  </time>
+              <li key={post.id} className="card overflow-hidden !p-0">
+                <div className="relative h-36 w-full bg-sage-light">
+                  {post.imageUrl ? (
+                    <Image src={post.imageUrl} alt="" fill className="object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sage">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+                        {postIcon}
+                      </svg>
+                    </div>
+                  )}
+                  <span className={`absolute left-3 top-3 rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${categoryBadge[post.category]}`}>
+                    {postCategoryLabels[post.category]}
+                  </span>
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-slate">{post.body}</p>
-                {canDelete && (
-                  <form action={deletePost.bind(null, post.id)} className="mt-3">
-                    <button
-                      type="submit"
-                      className="text-xs font-medium text-muted hover:text-red-600"
-                    >
-                      Delete
-                    </button>
-                  </form>
-                )}
+                <div className="flex flex-col gap-2 p-4">
+                  <h2 className="font-semibold text-navy">{post.title}</h2>
+                  <p className="line-clamp-2 text-sm text-slate">{post.body}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted">{timeAgo(post.createdAt)}</p>
+                    {canDelete && (
+                      <form action={deletePost.bind(null, post.id)}>
+                        <button type="submit" className="text-xs font-medium text-muted hover:text-red-600">
+                          Delete
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
               </li>
             );
           })}
