@@ -188,18 +188,20 @@ export default async function OwnerPage({
         ) : (
           <ul className="divide-y divide-slate/10 overflow-hidden rounded-2xl border border-slate-900/8 bg-white shadow-sm shadow-slate-900/5">
             {residents.map((person) => (
-              <li
-                key={person.id}
-                className="flex items-center justify-between px-6 py-4"
-              >
-                <div>
-                  <p className="font-medium text-navy">{person.name}</p>
-                  <p className="text-sm text-muted">{person.email}</p>
-                </div>
-                <div className="text-right text-sm">
-                  <p className="font-medium text-slate">{person.neighborhoodName}</p>
-                  <p className="text-muted">{person.unit ?? "—"}</p>
-                </div>
+              <li key={person.id}>
+                <Link
+                  href={`/dashboard/users/${person.id}`}
+                  className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-sage-light/40"
+                >
+                  <div>
+                    <p className="font-medium text-navy">{person.name}</p>
+                    <p className="text-sm text-muted">{person.email}</p>
+                  </div>
+                  <div className="text-right text-sm">
+                    <p className="font-medium text-slate">{person.neighborhoodName}</p>
+                    <p className="text-muted">{person.unit ?? "—"}</p>
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>

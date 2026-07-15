@@ -61,6 +61,19 @@ const shortcuts = [
       </>
     ),
   },
+  {
+    href: "/dashboard/users",
+    title: "Manage residents",
+    description: "Edit resident profiles in your neighborhood.",
+    icon: (
+      <>
+        <circle cx="9" cy="8" r="3" />
+        <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+        <path d="M17 8a3 3 0 1 1-1-5.6" />
+        <path d="M21 20c0-2.5-1.7-4.6-4-5.4" />
+      </>
+    ),
+  },
 ];
 
 export default async function AdminPage() {
