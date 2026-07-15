@@ -37,6 +37,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
           email: user.email,
           role: user.role,
           neighborhoodId: user.neighborhoodId,
+          isDemo: user.isDemo,
         };
       },
     }),
@@ -96,6 +97,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
           token.sub = dbUser.id;
           token.role = dbUser.role;
           token.neighborhoodId = dbUser.neighborhoodId;
+          token.isDemo = dbUser.isDemo;
           return token;
         }
 
@@ -107,12 +109,14 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
           token.sub = dbUser.id;
           token.role = dbUser.role;
           token.neighborhoodId = dbUser.neighborhoodId;
+          token.isDemo = dbUser.isDemo;
         } else if (account?.provider === "google") {
           // First-time Google sign-in with no matching account yet — send
           // them through onboarding to pick a neighborhood before they get
           // a real users row.
           token.role = "pending";
           token.neighborhoodId = null;
+          token.isDemo = false;
         }
       }
       return token;
@@ -122,6 +126,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
         session.user.id = token.sub as string;
         session.user.role = token.role as string;
         session.user.neighborhoodId = token.neighborhoodId as string | null;
+        session.user.isDemo = token.isDemo as boolean;
       }
       return session;
     },

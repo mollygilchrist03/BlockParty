@@ -51,6 +51,7 @@ export const users = pgTable("users", {
   role: roleEnum("role").notNull().default("resident"),
   unit: varchar("unit", { length: 100 }),
   directoryOptIn: boolean("directory_opt_in").notNull().default(false),
+  isDemo: boolean("is_demo").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

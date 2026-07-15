@@ -5,6 +5,7 @@ declare module "next-auth" {
     id: string;
     role: string;
     neighborhoodId: string | null;
+    isDemo: boolean;
   }
 
   interface Session {
@@ -12,6 +13,7 @@ declare module "next-auth" {
       id: string;
       role: string;
       neighborhoodId: string | null;
+      isDemo: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -20,5 +22,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     role: string;
     neighborhoodId: string | null;
+    isDemo: boolean;
   }
 }
