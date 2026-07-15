@@ -12,6 +12,13 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+const MAX_NEWSLETTER_BYTES = 15 * 1024 * 1024;
+
+function safeFileName(name: string) {
+  const base = name.split(/[/\\]/).pop() ?? "newsletter";
+  return base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100) || "newsletter.pdf";
+}
+
 async function uploadNewsletter(formData: FormData) {
   "use server";
 
@@ -26,6 +33,7 @@ async function uploadNewsletter(formData: FormData) {
   if (
     !(file instanceof File) ||
     file.size === 0 ||
+    file.size > MAX_NEWSLETTER_BYTES ||
     !title ||
     !neighborhoodId ||
     !Number.isInteger(month) ||
@@ -36,10 +44,24 @@ async function uploadNewsletter(formData: FormData) {
     return;
   }
 
-  const blob = await put(`newsletters/${neighborhoodId}/${file.name}`, file, {
-    access: "public",
-    contentType: file.type || "application/pdf",
-  });
+  // Don't trust the client-supplied MIME type — check the actual file
+  // signature so an admin/board account can't get an arbitrary file type
+  // stored (and served back, publicly, with an attacker-chosen
+  // content-type) under the app's newsletters.
+  const header = new Uint8Array(await file.slice(0, 5).arrayBuffer());
+  const isPdf = new TextDecoder().decode(header) === "%PDF-";
+  if (!isPdf) return;
+
+  let blob;
+  try {
+    blob = await put(`newsletters/${neighborhoodId}/${safeFileName(file.name)}`, file, {
+      access: "public",
+      contentType: "application/pdf",
+    });
+  } catch (err) {
+    console.error("[newsletters] blob upload failed", err);
+    redirect("/dashboard/newsletters/new?error=upload-failed");
+  }
 
   await db.insert(newsletters).values({
     neighborhoodId,
@@ -68,6 +90,11 @@ export default async function NewNewsletterPage({
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">Upload newsletter</h1>
       <DemoReadonlyBanner error={error} />
+      {error === "upload-failed" && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          The file couldn&apos;t be uploaded. Please try again.
+        </p>
+      )}
       <form action={uploadNewsletter} className="card flex flex-col gap-4">
         {!user.neighborhoodId && (
           <label className="flex flex-col gap-1 text-sm text-slate">
