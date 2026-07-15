@@ -11,12 +11,14 @@ recurring schedules.
 
 | Role | Email | Password |
 |---|---|---|
+| Owner | `owner@blockparty.test` | `password123` |
 | Admin | `admin@maplegrove.test` | `password123` |
 | Resident | `resident@maplegrove.test` | `password123` |
 
 Residents can also sign in with Google — see [Sign-in model](#sign-in-model).
-(The platform-owner tier is tied to the deployer's own Google account and
-isn't demoable by visitors — see below.)
+The owner demo account is a regular seeded credentials login like the
+other two — the *real* owner (tied to the deployer's own Google account
+via `OWNER_EMAIL`) is a separate, non-demoable account with the same role.
 
 ![Landing page](docs/screenshots/landing.png)
 
@@ -70,9 +72,11 @@ A few things here were built the harder-but-more-realistic way on purpose:
 - **A platform tier above the tenants.** A fourth role, `owner`, sits above
   `resident`/`board`/`admin` and isn't scoped to any neighborhood — it's
   auto-provisioned for one specific email (`OWNER_EMAIL`) on Google
-  sign-in, and provisions new neighborhoods and HOA admin accounts from
-  `/dashboard/owner`. This is the same shape as how most real multi-tenant
-  SaaS onboards new customers/orgs.
+  sign-in. From `/dashboard/owner` it gets full CRUD on neighborhoods and
+  HOA admin accounts — including a guardrail that only allows deleting a
+  neighborhood once it's actually empty, since the FK cascade otherwise
+  takes every resident, admin, and their posts/events with it. This is the
+  same shape as how most real multi-tenant SaaS onboards new customers/orgs.
 
 ## Tech stack
 
@@ -89,7 +93,9 @@ A few things here were built the harder-but-more-realistic way on purpose:
 - **Owner** — one specific Google account (set via `OWNER_EMAIL`) is
   auto-provisioned/promoted to `owner` on sign-in. Not tied to any
   neighborhood; manages neighborhoods and HOA admin accounts from
-  `/dashboard/owner`.
+  `/dashboard/owner`. (The seeded `owner@blockparty.test` demo account
+  reaches the same dashboard via credentials — the role check doesn't
+  care which provider got you there, only the `users.role` column.)
 - **Admin/board** accounts are provisioned by the owner (via
   `/dashboard/owner/admins/new`, or the seed script for local dev) and sign
   in with email + password.
