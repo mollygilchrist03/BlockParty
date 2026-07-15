@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "BlockParty",
   description:
     "Community events, announcements, amenity reservations, and more for your HOA or neighborhood.",
-  icons: { icon: "/logo.svg" },
+  icons: { icon: "/BlockParty.svg" },
 };
 
 export default function RootLayout({
