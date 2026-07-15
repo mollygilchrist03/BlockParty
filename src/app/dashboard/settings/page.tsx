@@ -48,7 +48,7 @@ export default async function SettingsPage({
         <p className="mt-1 text-sm text-slate">
           When enabled, your name and unit are visible to other residents on
           the{" "}
-          <a href="/dashboard/directory" className="text-sage hover:underline">
+          <a href="/dashboard/directory" className="text-sage underline">
             directory page
           </a>
           .
