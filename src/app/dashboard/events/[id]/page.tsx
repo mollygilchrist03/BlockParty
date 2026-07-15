@@ -3,12 +3,14 @@ import { revalidatePath } from "next/cache";
 import { and, asc, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { eventRegistrations, events } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { assertNotDemo, requireUser } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function toggleRsvp(eventId: string) {
   "use server";
 
   const user = await requireUser();
+  assertNotDemo(user, `/dashboard/events/${eventId}`);
 
   const [existing] = await db
     .select()
@@ -82,10 +84,13 @@ async function toggleRsvp(eventId: string) {
 
 export default async function EventDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error } = await searchParams;
   const user = await requireUser();
 
   const [event] = await db.select().from(events).where(eq(events.id, id)).limit(1);
@@ -124,6 +129,8 @@ export default async function EventDetailPage({
       {event.description && (
         <p className="whitespace-pre-wrap text-slate">{event.description}</p>
       )}
+
+      <DemoReadonlyBanner error={error} />
 
       <div className="card flex items-center gap-4">
         <div className="flex-1">

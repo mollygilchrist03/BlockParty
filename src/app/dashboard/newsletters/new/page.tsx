@@ -3,8 +3,9 @@ import { put } from "@vercel/blob";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, newsletters } from "@/db/schema";
-import { requireBoard } from "@/lib/session";
+import { assertNotDemo, requireBoard } from "@/lib/session";
 import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -15,6 +16,7 @@ async function uploadNewsletter(formData: FormData) {
   "use server";
 
   const user = await requireBoard();
+  assertNotDemo(user, "/dashboard/newsletters/new");
   const file = formData.get("file");
   const title = String(formData.get("title") ?? "").trim();
   const month = Number(formData.get("month"));
@@ -50,8 +52,13 @@ async function uploadNewsletter(formData: FormData) {
   redirect(postCreateRedirectPath(user, "/dashboard/newsletters"));
 }
 
-export default async function NewNewsletterPage() {
+export default async function NewNewsletterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await requireBoard();
+  const { error } = await searchParams;
   const now = new Date();
   const neighborhoodOptions = user.neighborhoodId
     ? []
@@ -60,6 +67,7 @@ export default async function NewNewsletterPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">Upload newsletter</h1>
+      <DemoReadonlyBanner error={error} />
       <form action={uploadNewsletter} className="card flex flex-col gap-4">
         {!user.neighborhoodId && (
           <label className="flex flex-col gap-1 text-sm text-slate">

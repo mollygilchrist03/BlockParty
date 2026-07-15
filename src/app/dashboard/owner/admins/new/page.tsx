@@ -3,12 +3,14 @@ import { hash } from "bcryptjs";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, users } from "@/db/schema";
-import { requireOwner } from "@/lib/session";
+import { assertNotDemo, requireOwner } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function createAdmin(formData: FormData) {
   "use server";
 
-  await requireOwner();
+  const user = await requireOwner();
+  assertNotDemo(user, "/dashboard/owner/admins/new");
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
@@ -60,6 +62,7 @@ export default async function NewAdminPage({
         <h1 className="mt-1 text-2xl font-semibold text-navy">New HOA admin</h1>
       </div>
       <form action={createAdmin} className="card flex flex-col gap-4">
+        <DemoReadonlyBanner error={error} />
         {error === "duplicate" && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
             An account with that email already exists.

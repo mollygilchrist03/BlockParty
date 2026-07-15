@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, scheduleFrequencyEnum, wasteSchedules, wasteTypeEnum } from "@/db/schema";
-import { requireBoard } from "@/lib/session";
+import { assertNotDemo, requireBoard } from "@/lib/session";
 import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 const dayNames = [
   "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
@@ -13,6 +14,7 @@ async function createSchedule(formData: FormData) {
   "use server";
 
   const user = await requireBoard();
+  assertNotDemo(user, "/dashboard/schedule/new");
   const type = String(formData.get("type") ?? "");
   const dayOfWeek = Number(formData.get("dayOfWeek"));
   const frequency = String(formData.get("frequency") ?? "weekly");
@@ -46,8 +48,13 @@ async function createSchedule(formData: FormData) {
   redirect(postCreateRedirectPath(user, "/dashboard/schedule"));
 }
 
-export default async function NewSchedulePage() {
+export default async function NewSchedulePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await requireBoard();
+  const { error } = await searchParams;
   const today = new Date().toISOString().slice(0, 10);
   const neighborhoodOptions = user.neighborhoodId
     ? []
@@ -56,6 +63,7 @@ export default async function NewSchedulePage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">New pickup schedule</h1>
+      <DemoReadonlyBanner error={error} />
       <form action={createSchedule} className="card flex flex-col gap-4">
         {!user.neighborhoodId && (
           <label className="flex flex-col gap-1 text-sm text-slate">

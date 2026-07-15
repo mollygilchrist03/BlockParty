@@ -2,7 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { and, count, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, users } from "@/db/schema";
-import { requireOwner } from "@/lib/session";
+import { assertNotDemo, requireOwner } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 function slugify(name: string) {
   return name
@@ -15,7 +16,8 @@ function slugify(name: string) {
 async function updateNeighborhood(id: string, formData: FormData) {
   "use server";
 
-  await requireOwner();
+  const user = await requireOwner();
+  assertNotDemo(user, `/dashboard/owner/neighborhoods/${id}`);
   const name = String(formData.get("name") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
   if (!name) return;
@@ -35,7 +37,8 @@ async function updateNeighborhood(id: string, formData: FormData) {
 async function deleteNeighborhood(id: string) {
   "use server";
 
-  await requireOwner();
+  const user = await requireOwner();
+  assertNotDemo(user, `/dashboard/owner/neighborhoods/${id}`);
 
   const [{ total }] = await db
     .select({ total: count() })
@@ -83,6 +86,8 @@ export default async function NeighborhoodDetailPage({
           Edit neighborhood
         </h1>
       </div>
+
+      <DemoReadonlyBanner error={error} />
 
       <form
         action={updateNeighborhood.bind(null, id)}

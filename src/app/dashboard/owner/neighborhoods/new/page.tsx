@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { neighborhoods } from "@/db/schema";
-import { requireOwner } from "@/lib/session";
+import { assertNotDemo, requireOwner } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 function slugify(name: string) {
   return name
@@ -14,7 +15,8 @@ function slugify(name: string) {
 async function createNeighborhood(formData: FormData) {
   "use server";
 
-  await requireOwner();
+  const user = await requireOwner();
+  assertNotDemo(user, "/dashboard/owner/neighborhoods/new");
   const name = String(formData.get("name") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
   if (!name) return;
@@ -51,6 +53,7 @@ export default async function NewNeighborhoodPage({
         </h1>
       </div>
       <form action={createNeighborhood} className="card flex flex-col gap-4">
+        <DemoReadonlyBanner error={error} />
         {error === "duplicate" && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
             A neighborhood with that name already exists.

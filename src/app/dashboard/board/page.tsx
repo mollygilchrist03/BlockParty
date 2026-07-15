@@ -3,8 +3,9 @@ import { revalidatePath } from "next/cache";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
-import { requireNeighborhoodUser, requireUser } from "@/lib/session";
+import { assertNotDemo, requireNeighborhoodUser, requireUser } from "@/lib/session";
 import { boardOnlyRoles } from "@/lib/roles";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 const categories = [
   { value: "yard_sale", label: "Yard sale" },
@@ -26,6 +27,7 @@ async function deletePost(postId: string) {
 
   const canDelete = post.authorId === user.id || boardOnlyRoles.includes(user.role);
   if (!canDelete) return;
+  assertNotDemo(user, "/dashboard/board");
 
   await db.delete(posts).where(eq(posts.id, postId));
   revalidatePath("/dashboard/board");
@@ -34,10 +36,10 @@ async function deletePost(postId: string) {
 export default async function BulletinBoardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; error?: string }>;
 }) {
   const user = await requireNeighborhoodUser();
-  const { category } = await searchParams;
+  const { category, error } = await searchParams;
 
   const activeCategory = categories.find((c) => c.value === category)?.value;
 
@@ -66,6 +68,8 @@ export default async function BulletinBoardPage({
           New post
         </Link>
       </div>
+
+      <DemoReadonlyBanner error={error} />
 
       <div className="flex flex-wrap gap-2 text-sm">
         <Link

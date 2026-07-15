@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { postCategoryEnum, posts } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { assertNotDemo, requireUser } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 const categories = [
   { value: "general", label: "General" },
@@ -14,6 +15,7 @@ async function createPost(formData: FormData) {
   "use server";
 
   const user = await requireUser();
+  assertNotDemo(user, "/dashboard/board/new");
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
   const category = String(formData.get("category") ?? "general");
@@ -38,12 +40,18 @@ async function createPost(formData: FormData) {
   redirect("/dashboard/board");
 }
 
-export default async function NewPostPage() {
+export default async function NewPostPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   await requireUser();
+  const { error } = await searchParams;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">New post</h1>
+      <DemoReadonlyBanner error={error} />
       <form action={createPost} className="card flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm text-slate">
           Category

@@ -3,12 +3,14 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { assertNotDemo, requireUser } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function updateDirectoryOptIn(formData: FormData) {
   "use server";
 
   const user = await requireUser();
+  assertNotDemo(user, "/dashboard/settings");
   const optIn = formData.get("directoryOptIn") === "on";
 
   await db
@@ -24,10 +26,10 @@ async function updateDirectoryOptIn(formData: FormData) {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
   const user = await requireUser();
-  const { saved } = await searchParams;
+  const { saved, error } = await searchParams;
 
   const [me] = await db
     .select({ directoryOptIn: users.directoryOptIn })
@@ -38,6 +40,8 @@ export default async function SettingsPage({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-12 sm:px-10">
       <h1 className="text-2xl font-semibold text-navy">Settings</h1>
+
+      <DemoReadonlyBanner error={error} />
 
       <div className="card">
         <h2 className="font-semibold text-navy">Community directory</h2>

@@ -3,12 +3,14 @@ import { hash } from "bcryptjs";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { neighborhoods, users } from "@/db/schema";
-import { requireOwner } from "@/lib/session";
+import { assertNotDemo, requireOwner } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function updateAdmin(id: string, formData: FormData) {
   "use server";
 
-  await requireOwner();
+  const user = await requireOwner();
+  assertNotDemo(user, `/dashboard/owner/admins/${id}`);
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
@@ -47,7 +49,8 @@ async function updateAdmin(id: string, formData: FormData) {
 async function deleteAdmin(id: string) {
   "use server";
 
-  await requireOwner();
+  const user = await requireOwner();
+  assertNotDemo(user, `/dashboard/owner/admins/${id}`);
   await db.delete(users).where(eq(users.id, id));
   redirect("/dashboard/owner?deleted=admin");
 }
@@ -85,6 +88,8 @@ export default async function AdminDetailPage({
           Edit HOA admin
         </h1>
       </div>
+
+      <DemoReadonlyBanner error={error} />
 
       <form
         action={updateAdmin.bind(null, id)}

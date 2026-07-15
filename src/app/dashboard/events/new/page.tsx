@@ -2,13 +2,15 @@ import { redirect } from "next/navigation";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { events, neighborhoods } from "@/db/schema";
-import { requireBoard } from "@/lib/session";
+import { assertNotDemo, requireBoard } from "@/lib/session";
 import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function createEvent(formData: FormData) {
   "use server";
 
   const user = await requireBoard();
+  assertNotDemo(user, "/dashboard/events/new");
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const location = String(formData.get("location") ?? "").trim();
@@ -31,8 +33,13 @@ async function createEvent(formData: FormData) {
   redirect(postCreateRedirectPath(user, "/dashboard/events"));
 }
 
-export default async function NewEventPage() {
+export default async function NewEventPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await requireBoard();
+  const { error } = await searchParams;
   const neighborhoodOptions = user.neighborhoodId
     ? []
     : await db.select({ id: neighborhoods.id, name: neighborhoods.name }).from(neighborhoods).orderBy(asc(neighborhoods.name));
@@ -43,6 +50,7 @@ export default async function NewEventPage() {
         <p className="eyebrow">Admin</p>
         <h1 className="mt-1 text-2xl font-semibold text-navy">New event</h1>
       </div>
+      <DemoReadonlyBanner error={error} />
       <form action={createEvent} className="card flex flex-col gap-4">
         {!user.neighborhoodId && (
           <label className="flex flex-col gap-1 text-sm text-slate">

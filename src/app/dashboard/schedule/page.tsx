@@ -3,9 +3,10 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { wasteSchedules } from "@/db/schema";
-import { requireNeighborhoodUser, requireUser } from "@/lib/session";
+import { assertNotDemo, requireNeighborhoodUser, requireUser } from "@/lib/session";
 import { nextPickupDate } from "@/lib/waste";
 import { boardOnlyRoles } from "@/lib/roles";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 const typeLabels: Record<string, string> = {
   trash: "Trash",
@@ -22,13 +23,19 @@ async function deleteSchedule(scheduleId: string) {
 
   const user = await requireUser();
   if (!boardOnlyRoles.includes(user.role)) return;
+  assertNotDemo(user, "/dashboard/schedule");
 
   await db.delete(wasteSchedules).where(eq(wasteSchedules.id, scheduleId));
   revalidatePath("/dashboard/schedule");
 }
 
-export default async function SchedulePage() {
+export default async function SchedulePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await requireNeighborhoodUser();
+  const { error } = await searchParams;
 
   const rows = await db
     .select()
@@ -58,6 +65,8 @@ export default async function SchedulePage() {
           </Link>
         )}
       </div>
+
+      <DemoReadonlyBanner error={error} />
 
       {withNextPickup.length === 0 ? (
         <p className="text-slate">No pickup schedules set up yet.</p>

@@ -2,13 +2,15 @@ import { redirect } from "next/navigation";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { announcements, neighborhoods } from "@/db/schema";
-import { requireBoard } from "@/lib/session";
+import { assertNotDemo, requireBoard } from "@/lib/session";
 import { postCreateRedirectPath, resolveActingNeighborhoodId } from "@/lib/roles";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function createAnnouncement(formData: FormData) {
   "use server";
 
   const user = await requireBoard();
+  assertNotDemo(user, "/dashboard/announcements/new");
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
   const neighborhoodId = resolveActingNeighborhoodId(user, formData);
@@ -25,8 +27,13 @@ async function createAnnouncement(formData: FormData) {
   redirect(postCreateRedirectPath(user, "/dashboard/announcements"));
 }
 
-export default async function NewAnnouncementPage() {
+export default async function NewAnnouncementPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await requireBoard();
+  const { error } = await searchParams;
   const neighborhoodOptions = user.neighborhoodId
     ? []
     : await db.select({ id: neighborhoods.id, name: neighborhoods.name }).from(neighborhoods).orderBy(asc(neighborhoods.name));
@@ -37,6 +44,7 @@ export default async function NewAnnouncementPage() {
         <p className="eyebrow">Admin</p>
         <h1 className="mt-1 text-2xl font-semibold text-navy">New announcement</h1>
       </div>
+      <DemoReadonlyBanner error={error} />
       <form action={createAnnouncement} className="card flex flex-col gap-4">
         {!user.neighborhoodId && (
           <label className="flex flex-col gap-1 text-sm text-slate">

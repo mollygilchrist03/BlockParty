@@ -32,3 +32,13 @@ export async function requireNeighborhoodUser() {
   if (!neighborhoodId) redirect("/dashboard/owner");
   return { ...user, neighborhoodId };
 }
+
+/**
+ * The credentials published in the README (admin/resident/owner demo
+ * accounts) are publicly known, so anyone can sign in as them. Call this
+ * at the top of every mutating Server Action to block writes from those
+ * accounts while still letting them browse everything.
+ */
+export function assertNotDemo(user: { isDemo: boolean }, redirectTo: string) {
+  if (user.isDemo) redirect(`${redirectTo}?error=demo-readonly`);
+}

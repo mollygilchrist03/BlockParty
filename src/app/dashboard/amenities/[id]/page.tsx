@@ -3,12 +3,14 @@ import { revalidatePath } from "next/cache";
 import { and, asc, eq, gt, gte, lt } from "drizzle-orm";
 import { db } from "@/db";
 import { amenities, reservations, users } from "@/db/schema";
-import { requireUser } from "@/lib/session";
+import { assertNotDemo, requireUser } from "@/lib/session";
+import { DemoReadonlyBanner } from "@/components/demo-readonly-banner";
 
 async function reserveAmenity(amenityId: string, formData: FormData) {
   "use server";
 
   const user = await requireUser();
+  assertNotDemo(user, `/dashboard/amenities/${amenityId}`);
   const startsAtRaw = String(formData.get("startsAt") ?? "");
   const endsAtRaw = String(formData.get("endsAt") ?? "");
   if (!startsAtRaw || !endsAtRaw) return;
@@ -56,6 +58,7 @@ async function cancelReservation(reservationId: string) {
     .limit(1);
 
   if (!reservation || reservation.userId !== user.id) return;
+  assertNotDemo(user, `/dashboard/amenities/${reservation.amenityId}`);
 
   await db.delete(reservations).where(eq(reservations.id, reservationId));
   revalidatePath(`/dashboard/amenities/${reservation.amenityId}`);
@@ -103,6 +106,7 @@ export default async function AmenityDetailPage({
 
       <div className="card">
         <h2 className="font-semibold text-navy">Reserve a time slot</h2>
+        <DemoReadonlyBanner error={error} />
         {error === "conflict" && (
           <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
             That time overlaps with an existing reservation. Try a different slot.
