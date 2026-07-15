@@ -68,6 +68,37 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 
       if (user) {
         const email = user.email?.toLowerCase();
+        const ownerEmail = process.env.OWNER_EMAIL?.toLowerCase();
+
+        if (email && ownerEmail && email === ownerEmail) {
+          // The platform owner's account is auto-provisioned/promoted on
+          // sign-in rather than created via the seed script — it isn't
+          // tied to any neighborhood.
+          let [dbUser] = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
+
+          if (!dbUser) {
+            [dbUser] = await db
+              .insert(users)
+              .values({ name: user.name ?? "Owner", email, role: "owner" })
+              .returning();
+          } else if (dbUser.role !== "owner") {
+            [dbUser] = await db
+              .update(users)
+              .set({ role: "owner" })
+              .where(eq(users.id, dbUser.id))
+              .returning();
+          }
+
+          token.sub = dbUser.id;
+          token.role = dbUser.role;
+          token.neighborhoodId = dbUser.neighborhoodId;
+          return token;
+        }
+
         const [dbUser] = email
           ? await db.select().from(users).where(eq(users.email, email)).limit(1)
           : [];
