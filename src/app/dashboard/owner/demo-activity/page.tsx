@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { demoLoginEvents } from "@/db/schema";
 import { requireOwner } from "@/lib/session";
 import { timeAgo } from "@/lib/time-ago";
+import { LiveTimeAgo } from "@/components/live-time-ago";
 
 const roleLabels: Record<string, string> = {
   resident: "Resident",
@@ -40,7 +41,9 @@ export default async function DemoActivityPage() {
                 <p className="font-medium text-navy">{event.email}</p>
                 <p className="text-sm text-muted">{roleLabels[event.role] ?? event.role}</p>
               </div>
-              <time className="shrink-0 text-xs text-muted">{timeAgo(event.createdAt)}</time>
+              <time className="shrink-0 text-xs text-muted">
+                <LiveTimeAgo date={event.createdAt} initialText={timeAgo(event.createdAt)} />
+              </time>
             </li>
           ))}
         </ul>
