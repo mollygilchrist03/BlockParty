@@ -162,6 +162,13 @@ export const reservations = pgTable("reservations", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const demoLoginEvents = pgTable("demo_login_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: varchar("email", { length: 255 }).notNull(),
+  role: roleEnum("role").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const wasteSchedules = pgTable("waste_schedules", {
   id: uuid("id").primaryKey().defaultRandom(),
   neighborhoodId: uuid("neighborhood_id")

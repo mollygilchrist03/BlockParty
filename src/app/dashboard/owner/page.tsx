@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { asc, count, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { neighborhoodRequests, neighborhoods, users } from "@/db/schema";
+import { demoLoginEvents, neighborhoodRequests, neighborhoods, users } from "@/db/schema";
 import { requireOwner } from "@/lib/session";
 import { SavedBanner } from "@/components/saved-banner";
 
@@ -37,6 +37,10 @@ export default async function OwnerPage({
     .select({ pendingRequestCount: count() })
     .from(neighborhoodRequests)
     .where(eq(neighborhoodRequests.status, "pending"));
+
+  const [{ demoLoginCount }] = await db
+    .select({ demoLoginCount: count() })
+    .from(demoLoginEvents);
 
   const neighborhoodRows = await db
     .select()
@@ -119,6 +123,16 @@ export default async function OwnerPage({
           <span className="text-sm font-medium text-sage">Review →</span>
         </Link>
       )}
+
+      <Link
+        href="/dashboard/owner/demo-activity"
+        className="card card-link flex items-center justify-between"
+      >
+        <span className="font-medium text-navy">
+          {demoLoginCount} demo login{demoLoginCount === 1 ? "" : "s"} recorded
+        </span>
+        <span className="text-sm font-medium text-sage">View →</span>
+      </Link>
 
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">

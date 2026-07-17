@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 import { compare } from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { demoLoginEvents, users } from "@/db/schema";
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
@@ -70,6 +70,8 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
         } else {
           const passwordMatches = await compare(password, user.passwordHash);
           if (!passwordMatches) return null;
+
+          await db.insert(demoLoginEvents).values({ email: user.email, role: user.role });
         }
 
         return {
