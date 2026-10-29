@@ -48,3 +48,6 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# personal interview prep notes — never committed
+/interview-qa.md
